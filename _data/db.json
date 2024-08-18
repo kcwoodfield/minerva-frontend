@@ -46,6 +46,7 @@
     "dewey_decimal": "813/.52",
     "library_of_congress_classification": "PS3515.E37 F3",
     "bibliography": [],
+    "completed": true,
     "awards": [
       {
         "award_name": "Pulitzer Prize for Fiction",
@@ -100,6 +101,7 @@
     "dewey_decimal": "809/.93353",
     "library_of_congress_classification": "PN56.S5 P3",
     "bibliography": [],
+    "completed": true,
     "awards": []
   },
     {
@@ -148,6 +150,7 @@
       "dewey_decimal": "813/.54",
       "library_of_congress_classification": "PS3563.C337",
       "bibliography": [],
+      "completed": true,
       "awards": [
         {
           "award_name": "Western Literature Association Distinguished Achievement Award",
@@ -202,6 +205,7 @@
       "dewey_decimal": "833/.912",
       "library_of_congress_classification": "PT2617.E85 S7",
       "bibliography": [],
+      "completed": false,
       "awards": []
     },
     {
@@ -250,6 +254,7 @@
       "dewey_decimal": "946.081",
       "library_of_congress_classification": "DP269.O7",
       "bibliography": [],
+      "completed": true,
       "awards": []
     },
     {
@@ -298,6 +303,7 @@
       "dewey_decimal": "813/.54",
       "library_of_congress_classification": "PS3545.I5286",
       "bibliography": [],
+      "completed": true,
       "awards": [
         {
           "award_name": "Waterstones Book of the Year",
@@ -352,6 +358,7 @@
       "dewey_decimal": "813/.54",
       "library_of_congress_classification": "PS3569.A4625",
       "bibliography": [],
+      "completed": true,
       "awards": []
     },
     {
@@ -400,6 +407,7 @@
       "dewey_decimal": "843/.914",
       "library_of_congress_classification": "PQ2668.O77 S47",
       "bibliography": [],
+      "completed": true,
       "awards": []
     },
     {
@@ -451,6 +459,7 @@
       "dewey_decimal": "839.823/8",
       "library_of_congress_classification": "PT8951.24.N387 M9",
       "bibliography": [],
+      "completed": true,
       "awards": [
         {
           "award_name": "Brage Prize",

@@ -40,6 +40,7 @@ interface Book {
   dewey_decimal: string;
   library_of_congress_classification: string;
   bibliography: any[];
+  completed: boolean;
   awards: {
     award_name: string;
     year: number;
@@ -79,6 +80,7 @@ export default async function Home() {
                   <TableHead>Author</TableHead>
                   <TableHead>Pages</TableHead>
                   <TableHead>Rating</TableHead>
+                  <TableHead>Completed</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -89,6 +91,7 @@ export default async function Home() {
                     <TableCell>{book.author}</TableCell>
                     <TableCell>{book.pages}</TableCell>
                     <TableCell>{book.rating.average_rating}</TableCell>
+                    <TableCell>{book.completed ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
