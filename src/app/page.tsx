@@ -78,9 +78,9 @@ export default async function Home() {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Author</TableHead>
-                  <TableHead>Pages</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead>Completed</TableHead>
+                  <TableHead className="invisible md:visible">Pages</TableHead>
+                  <TableHead className="invisible md:visible">Rating</TableHead>
+                  <TableHead className="invisible md:visible">Completed</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -89,9 +89,9 @@ export default async function Home() {
                    <TableRow key={book.isbn}>
                     <TableCell className="font-medium">{book.title}</TableCell>
                     <TableCell>{book.author}</TableCell>
-                    <TableCell>{book.pages}</TableCell>
-                    <TableCell>{book.rating.average_rating}</TableCell>
-                    <TableCell>{book.completed ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="invisible md:visible">{book.pages}</TableCell>
+                    <TableCell className="invisible md:visible">{book.rating.average_rating}</TableCell>
+                    <TableCell className="invisible md:visible">{book.completed ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
