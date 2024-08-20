@@ -6,11 +6,9 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-then, to mock a rest api use json-server and point to the data.json on a different port than Next.js:
+then, to mock a rest api use json-server and point to the data.json on a different port:
 
 ```bash
 npm install -g json-server
