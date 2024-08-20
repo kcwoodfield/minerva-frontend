@@ -10,6 +10,16 @@ npm run dev
 yarn dev
 ```
 
+then, to mock a rest api use json-server and point to the data.json on a different port than Next.js:
+
+```bash
+npm install -g json-server
+# then
+npx json-server --watch ./_data/db.json --port4000
+```
+
+## Book data
+
 Below is a description of a json object for a list of books, including fields that are typically used in a library's inventory system:
 
 ### Explanation of Fields:
