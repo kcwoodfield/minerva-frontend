@@ -15,7 +15,7 @@ then, to mock a rest api use json-server and point to the data.json on a differe
 ```bash
 npm install -g json-server
 # then
-npx json-server --watch ./_data/db.json --port4000
+npx json-server --watch ./_data/db.json --port 4000
 ```
 
 ## Book data
