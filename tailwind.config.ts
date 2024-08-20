@@ -19,6 +19,7 @@ const config = {
     },
     extend: {
       colors: {
+        light: "rgba(255,254,250,1)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -74,7 +75,8 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate")],
 } satisfies Config
 
 export default config
