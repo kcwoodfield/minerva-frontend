@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '/public/logo/8.webp';
+import logo from '/public/logo/logo.png';
 import Image from 'next/image';
 
 const MenuBar: React.FC = () => {
