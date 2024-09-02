@@ -10,6 +10,8 @@ npm run dev
 
 ## To-Do
 
+- Create/Add a Book using [Google Books API:](https://developers.google.com/books)
+- Create/Add a Book using Django Admin
 - Remove shadcd-ui
 - Install Chakra UI
 - Implement the application auth feature
