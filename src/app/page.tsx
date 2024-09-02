@@ -36,6 +36,15 @@ import {
   TableCaption,
   TableContainer,
 } from '@chakra-ui/react'
+import {
+  Drawer,
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+} from '@chakra-ui/react'
 
 async function fetchBooks(): Promise<Book[]> {
   const response = await fetch("http://127.0.0.1:8001/api/library");

@@ -1,8 +1,14 @@
+"use client"
+
 import React from 'react';
 import logo from '/public/logo/logo.png';
 import Image from 'next/image';
+import { Input } from '@chakra-ui/react'
+import AddBook from "@/components/addbook";
 
 const MenuBar: React.FC = () => {
+    const [isOpen, setIsOpen] = React.useState(false);
+
     return (
         <header className="mb-8 bg-light shadow-sm lg:static lg:overflow-y-visible p-2">
             <div className="mx-auto max-w-7xl">
@@ -17,6 +23,8 @@ const MenuBar: React.FC = () => {
                                     title="Minerva, organize your books."
                                     width={75} />
                             </a>
+                            <Input placeholder='Search for a book...' />
+                            <AddBook />
                         </div>
                     </div>
                 </div>

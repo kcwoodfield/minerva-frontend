@@ -12,9 +12,7 @@ npm run dev
 
 - Create/Add a Book using [Google Books API:](https://developers.google.com/books)
 - Create/Add a Book using Django Admin
-- Remove shadcd-ui
-- Install Chakra UI
 - Implement the application auth feature
 - Implement the user auth feature
 - Push branding and homepage layout
-- Unit tests for the backend API
+- connect [Hugging Face transformer](https://huggingface.co/)

@@ -23,8 +23,7 @@ export default function RootLayout({
       <body className={GeistMono.className}>
         <Providers>
           <MenuBar />
-
-              {children}
+          {children}
         </Providers>
       </body>
     </html>
