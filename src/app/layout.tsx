@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { Providers } from './providers'
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
-import MenuBar from "@/components/menubar"
+
+import MenuBar from "@/components/menubar";
+
 import "./globals.css";
 
 
@@ -17,9 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={GeistSans.className}>
-        <MenuBar />
-        {children}
+      <body className={GeistMono.className}>
+        <Providers>
+          <MenuBar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

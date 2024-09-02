@@ -23,14 +23,6 @@ interface Book {
   completed: boolean;
 }
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 
 async function fetchBooks(): Promise<Book[]> {
   const response = await fetch("http://127.0.0.1:8001/api/library");
@@ -45,33 +37,15 @@ export default async function Home() {
 
   return (
     <main>
-      <div className="container mx-auto grid grid-cols-1 gap-8">
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Author</TableHead>
-                  <TableHead className="invisible md:visible">Pages</TableHead>
-                  <TableHead className="invisible md:visible">Rating</TableHead>
-                  <TableHead className="invisible md:visible">Completed</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {books.map(book => (
-                   <TableRow key={book.isbn}>
-                    <TableCell className="font-medium">{book.title}</TableCell>
-                    <TableCell>{book.author}</TableCell>
-                    <TableCell className="invisible md:visible">{book.pages}</TableCell>
-                    <TableCell className="invisible md:visible">{book.rating}</TableCell>
-                    <TableCell className="invisible md:visible">{book.completed ? 'Yes' : 'No'}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-
-      </div>
+    {books.map(book => (
+      <li key={book.isbn}>
+        <div className="font-medium">{book.title}</div>
+        <div>{book.author}</div>
+        <div className="invisible md:visible">{book.pages}</div>
+        <div className="invisible md:visible">{book.rating}</div>
+        <div className="invisible md:visible">{book.completed ? 'Yes' : 'No'}</div>
+      </li>
+    ))}
     </main>
   );
 }
