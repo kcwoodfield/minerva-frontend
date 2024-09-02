@@ -11,47 +11,21 @@ interface Book {
   format: string;
   edition: string;
   summary: string;
-  keywords: string[];
   tags: string[];
   cover_image_url: string;
-  availability: {
-    status: string;
-    due_date: string | null;
-    library_location: string;
-    number_of_copies: number;
-  };
-  rating: {
-    average_rating: number;
-    number_of_reviews: number;
-    reviews: {
-      reviewer: string;
-      review_date: string;
-      rating: number;
-      comment: string;
-    }[];
-  };
+  rating: number;
   related_books: {
     title: string;
     author: string;
     isbn: string;
   }[];
   series_info: string | null;
-  isbn_10: string;
-  dewey_decimal: string;
-  library_of_congress_classification: string;
-  bibliography: any[];
   completed: boolean;
-  awards: {
-    award_name: string;
-    year: number;
-    category: string;
-  }[];
 }
 
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -59,7 +33,7 @@ import {
 } from "@/components/ui/table"
 
 async function fetchBooks(): Promise<Book[]> {
-  const response = await fetch("http://localhost:4000/books");
+  const response = await fetch("http://127.0.0.1:8001/api/library");
   if (!response.ok) {
     throw new Error("Failed to fetch books");
   }
@@ -90,7 +64,7 @@ export default async function Home() {
                     <TableCell className="font-medium">{book.title}</TableCell>
                     <TableCell>{book.author}</TableCell>
                     <TableCell className="invisible md:visible">{book.pages}</TableCell>
-                    <TableCell className="invisible md:visible">{book.rating.average_rating}</TableCell>
+                    <TableCell className="invisible md:visible">{book.rating}</TableCell>
                     <TableCell className="invisible md:visible">{book.completed ? 'Yes' : 'No'}</TableCell>
                   </TableRow>
                 ))}
