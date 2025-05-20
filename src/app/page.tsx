@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+
 interface Book {
   title: string;
   author: string;
@@ -23,18 +28,45 @@ interface Book {
   completed: boolean;
 }
 
-import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+export default function Home() {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-async function fetchBooks(): Promise<Book[]> {
-  const response = await fetch(process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8001/api/library");
-  if (!response.ok) {
-    throw new Error("Failed to fetch books");
+  useEffect(() => {
+    async function fetchBooks() {
+      try {
+        const response = await fetch(process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8001/api/library");
+        if (!response.ok) {
+          throw new Error("Failed to fetch books");
+        }
+        const data = await response.json();
+        setBooks(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBooks();
+  }, []);
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography>Loading...</Typography>
+      </Container>
+    );
   }
-  return response.json();
-}
 
-export default async function Home() {
-  const books = await fetchBooks();
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography color="error">{error}</Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
