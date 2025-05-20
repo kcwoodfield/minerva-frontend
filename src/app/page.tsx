@@ -26,7 +26,7 @@ interface Book {
 import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 
 async function fetchBooks(): Promise<Book[]> {
-  const response = await fetch("http://127.0.0.1:8001/api/library");
+  const response = await fetch(process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8001/api/library");
   if (!response.ok) {
     throw new Error("Failed to fetch books");
   }

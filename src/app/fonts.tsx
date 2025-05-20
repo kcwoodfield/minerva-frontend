@@ -1,5 +1,5 @@
 // app/fonts.ts
-import { Cormorant_Garamond } from '@next/font/google'
+import { Cormorant_Garamond } from "next/font/google"
 
 const cormorant_garamond = Cormorant_Garamond({
   subsets: ['latin'],
