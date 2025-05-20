@@ -1,7 +1,20 @@
 'use client'
 
-import { ChakraProvider } from '@chakra-ui/react'
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+const theme = createTheme({
+  // You can customize your theme here
+  palette: {
+    mode: 'light',
+  },
+});
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <ChakraProvider>{children}</ChakraProvider>
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  );
 }

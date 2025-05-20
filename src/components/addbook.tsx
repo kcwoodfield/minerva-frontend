@@ -1,101 +1,94 @@
 "use client"
 
-import React, { Component } from 'react';
-import { AddIcon } from '@chakra-ui/icons'
-
+import React from 'react';
+import AddIcon from '@mui/icons-material/Add';
 import {
     Button,
     Stack,
     Box,
-    FormLabel,
-    Input,
-    InputGroup,
-    InputLeftAddon,
-    Textarea,
+    TextField,
+    FormControl,
+    InputLabel,
     Select,
-    InputRightAddon,
-    useDisclosure,
+    MenuItem,
     Drawer,
-    DrawerBody,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerCloseButton,
-  } from '@chakra-ui/react'
-
+    IconButton,
+    Typography,
+} from '@mui/material';
 
 const AddBook: React.FC = () => {
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const firstField = React.useRef()
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    const handleOpen = () => setIsOpen(true);
+    const handleClose = () => setIsOpen(false);
 
     return (
-      <>
-        <Button leftIcon={<AddIcon boxSize={6} />} colorScheme='teal' onClick={onOpen}>
-          Create user
-        </Button>
-        <Drawer
-          isOpen={isOpen}
-          placement='right'
-          initialFocusRef={firstField}
-          onClose={onClose}
-        >
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader borderBottomWidth='1px'>
-              Create a new account
-            </DrawerHeader>
-
-            <DrawerBody>
-              <Stack spacing='24px'>
-                <Box>
-                  <FormLabel htmlFor='username'>Name</FormLabel>
-                  <Input
-                    ref={firstField}
-                    id='username'
-                    placeholder='Please enter user name'
-                  />
+        <>
+            <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={handleOpen}
+                sx={{ ml: 2 }}
+            >
+                Create user
+            </Button>
+            <Drawer
+                anchor="right"
+                open={isOpen}
+                onClose={handleClose}
+            >
+                <Box sx={{ width: 400, p: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="h6">Create a new account</Typography>
+                        <IconButton onClick={handleClose}>
+                            <AddIcon />
+                        </IconButton>
+                    </Box>
+                    <Stack spacing={3}>
+                        <TextField
+                            label="Name"
+                            placeholder="Please enter user name"
+                            fullWidth
+                        />
+                        <TextField
+                            label="Url"
+                            placeholder="Please enter domain"
+                            fullWidth
+                            InputProps={{
+                                startAdornment: <Box sx={{ mr: 1 }}>http://</Box>,
+                                endAdornment: <Box sx={{ ml: 1 }}>.com</Box>,
+                            }}
+                        />
+                        <FormControl fullWidth>
+                            <InputLabel>Select Owner</InputLabel>
+                            <Select
+                                label="Select Owner"
+                                defaultValue="lobo"
+                            >
+                                <MenuItem value="lobo">Lobo the Wolf</MenuItem>
+                                <MenuItem value="cat">a cat</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <TextField
+                            label="Description"
+                            multiline
+                            rows={4}
+                            fullWidth
+                        />
+                    </Stack>
+                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button variant="outlined" onClick={handleClose}>
+                            Cancel
+                        </Button>
+                        <Button variant="contained" color="primary">
+                            Submit
+                        </Button>
+                    </Box>
                 </Box>
-
-                <Box>
-                  <FormLabel htmlFor='url'>Url</FormLabel>
-                  <InputGroup>
-                    <InputLeftAddon>http://</InputLeftAddon>
-                    <Input
-                      type='url'
-                      id='url'
-                      placeholder='Please enter domain'
-                    />
-                    <InputRightAddon>.com</InputRightAddon>
-                  </InputGroup>
-                </Box>
-
-                <Box>
-                  <FormLabel htmlFor='owner'>Select Owner</FormLabel>
-                  <Select id='owner' defaultValue='lobo'>
-                    <option value='lobo'>Lobo the Wolf</option>
-                    <option value='cat'>a cat</option>
-                  </Select>
-                </Box>
-
-                <Box>
-                  <FormLabel htmlFor='desc'>Description</FormLabel>
-                  <Textarea id='desc' />
-                </Box>
-              </Stack>
-            </DrawerBody>
-
-            <DrawerFooter borderTopWidth='1px'>
-              <Button variant='outline' mr={3} onClick={onClose}>
-                Cancel
-              </Button>
-              <Button colorScheme='blue'>Submit</Button>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-      </>
-    )
+            </Drawer>
+        </>
+    );
 };
 
 export default AddBook;
