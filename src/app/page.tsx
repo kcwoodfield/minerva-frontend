@@ -41,7 +41,7 @@ interface Book {
   date_added: string;
 }
 
-export default function Home() {
+function PageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -205,11 +205,8 @@ export default function Home() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Add SearchWrapper at the top with Suspense */}
       <Box sx={{ mb: 4 }}>
-        <Suspense fallback={<Box sx={{ height: 40 }} />}>
-          <SearchWrapper />
-        </Suspense>
+        <SearchWrapper />
       </Box>
 
       {/* Controls row */}
@@ -372,5 +369,17 @@ export default function Home() {
         </Button>
       </Box>
     </Container>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography>Loading...</Typography>
+      </Container>
+    }>
+      <PageContent />
+    </Suspense>
   );
 }
