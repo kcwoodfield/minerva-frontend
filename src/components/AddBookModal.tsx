@@ -43,7 +43,6 @@ export default function AddBookModal({ open, onClose }: AddBookModalProps) {
   const [newTag, setNewTag] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [rating, setRating] = useState<number | null>(null);
-  const [seriesInfo, setSeriesInfo] = useState('');
   const [completed, setCompleted] = useState(false);
 
   const handleAddTag = () => {
@@ -81,7 +80,6 @@ export default function AddBookModal({ open, onClose }: AddBookModalProps) {
           tags,
           cover_image_url: coverImageUrl,
           rating: rating || 0,
-          series_info: seriesInfo || null,
           completed,
         }),
       });
@@ -107,7 +105,6 @@ export default function AddBookModal({ open, onClose }: AddBookModalProps) {
       setTags([]);
       setCoverImageUrl('');
       setRating(null);
-      setSeriesInfo('');
       setCompleted(false);
       onClose();
     } catch (error) {
@@ -126,6 +123,9 @@ export default function AddBookModal({ open, onClose }: AddBookModalProps) {
           position: 'absolute',
           top: '80px',
           margin: 0,
+          p: 3,
+          borderRadius: 2,
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
         }
       }}
     >
@@ -297,14 +297,6 @@ export default function AddBookModal({ open, onClose }: AddBookModalProps) {
                   onChange={(_, newValue) => setRating(newValue)}
                 />
               </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Series Info"
-                value={seriesInfo}
-                onChange={(e) => setSeriesInfo(e.target.value)}
-                fullWidth
-              />
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel
