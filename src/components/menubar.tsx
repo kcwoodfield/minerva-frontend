@@ -16,7 +16,7 @@ const MenuBar: React.FC = () => {
             color="default"
             elevation={0}
             sx={{
-                backgroundColor: 'var(--background)',
+                backgroundColor: 'transparent',
             }}
         >
             <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -25,16 +25,29 @@ const MenuBar: React.FC = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 0.5
+                    '& > *:not(:last-child)': {
+                        mb: 0.5
+                    }
                 }}>
                     <Image
                         src={logo}
                         alt="Minerva Logo"
-                        width={32}
-                        height={32}
+                        width={64}
+                        height={64}
                     />
                     <Typography variant="h6" component="div">
                         Minerva
+                    </Typography>
+                    <Typography
+                        variant="subtitle2"
+                        component="div"
+                        sx={{
+                            color: 'var(--muted-foreground)',
+                            fontSize: '0.75rem',
+                            letterSpacing: '0.025em'
+                        }}
+                    >
+                        A Labyrinth of Pages
                     </Typography>
                 </Box>
                 <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>

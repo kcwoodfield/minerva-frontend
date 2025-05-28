@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Box, TextField, MenuItem, FormControl, InputLabel, Select, IconButton, Tooltip, SelectChangeEvent } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -205,9 +205,11 @@ export default function Home() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Add SearchWrapper at the top */}
+      {/* Add SearchWrapper at the top with Suspense */}
       <Box sx={{ mb: 4 }}>
-        <SearchWrapper />
+        <Suspense fallback={<Box sx={{ height: 40 }} />}>
+          <SearchWrapper />
+        </Suspense>
       </Box>
 
       {/* Controls row */}
@@ -345,9 +347,29 @@ export default function Home() {
         </Table>
       </TableContainer>
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-        <Button disabled={page === 1} onClick={() => handlePageChange(page - 1)}>Previous</Button>
-        <Typography sx={{ mx: 2 }}>Page {page} of {totalPages}</Typography>
-        <Button disabled={page === totalPages} onClick={() => handlePageChange(page + 1)}>Next</Button>
+        <Button
+          disabled={page === 1}
+          onClick={() => handlePageChange(page - 1)}
+          sx={{
+            fontFamily: 'var(--font-eb-garamond)',
+            fontSize: '0.875rem'
+          }}
+        >
+          Previous
+        </Button>
+        <Typography sx={{ mx: 2, fontFamily: 'var(--font-eb-garamond)' }}>
+          Page {page} of {totalPages}
+        </Typography>
+        <Button
+          disabled={page === totalPages}
+          onClick={() => handlePageChange(page + 1)}
+          sx={{
+            fontFamily: 'var(--font-eb-garamond)',
+            fontSize: '0.875rem'
+          }}
+        >
+          Next
+        </Button>
       </Box>
     </Container>
   );
