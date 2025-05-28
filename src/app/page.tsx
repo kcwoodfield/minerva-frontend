@@ -5,6 +5,8 @@ import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHea
 import { useRouter, useSearchParams } from 'next/navigation';
 import ClearIcon from '@mui/icons-material/Clear';
 import dynamic from 'next/dynamic';
+import { InputAdornment } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 // Dynamically import SearchWrapper with SSR disabled
 const SearchWrapper = dynamic(() => import('@/components/SearchWrapper'), {
@@ -60,6 +62,11 @@ export default function Home() {
   const [order, setOrder] = useState<'asc' | 'desc'>(initialOrder as 'asc' | 'desc');
   const [completed, setCompleted] = useState(initialCompleted);
   const [query, setQuery] = useState(initialQuery);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('title');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     setPage(initialPage);
@@ -166,6 +173,18 @@ export default function Home() {
 
   const handleClear = () => {
     router.push('/');
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('q', searchQuery);
+      params.set('page', '1');
+      params.set('sort', sortBy);
+      params.set('order', sortOrder);
+      params.set('completed', completed);
+      router.push(`/?${params.toString()}`);
+    }
   };
 
   if (loading) {

@@ -1,81 +1,77 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { TextField, InputAdornment, IconButton, Box } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { TextField, Box, Typography } from '@mui/material';
-import { useEffect, useRef } from 'react';
 
 export default function SearchWrapper() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const query = searchParams.get('q') || '';
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for CMD + K (Mac) or CTRL + K (Windows)
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault(); // Prevent browser's default search
-        inputRef.current?.focus();
-      }
-    };
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    const newQuery = event.target.value;
+  const handleSearch = (query: string) => {
     const params = new URLSearchParams(searchParams.toString());
-
-    if (newQuery) {
-      params.set('q', newQuery);
+    if (query) {
+      params.set('q', query);
     } else {
       params.delete('q');
     }
-
-    // Reset to page 1 when searching
     params.set('page', '1');
-
     router.push(`/?${params.toString()}`);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearch(searchQuery);
+    }
+  };
+
   return (
-    <Box className="relative">
+    <Box sx={{
+      width: '100%',
+      maxWidth: '500px',
+      mx: 'auto',
+      px: { xs: 2, sm: 0 }
+    }}>
       <TextField
-        inputRef={inputRef}
         fullWidth
         size="small"
-        label="Search Books"
-        value={query}
-        onChange={handleSearchChange}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-          }
-        }}
-        placeholder="Search by title or author..."
+        placeholder="Search books..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onKeyDown={handleKeyDown}
         InputProps={{
-          endAdornment: (
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-                display: { xs: 'none', sm: 'block' },
-                position: 'absolute',
-                right: 14,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                backgroundColor: 'background.paper',
-                padding: '0 4px',
-                borderRadius: 1,
-                border: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              ⌘K
-            </Typography>
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon sx={{ fontSize: '1rem', color: 'var(--muted-foreground)' }} />
+            </InputAdornment>
           ),
+          endAdornment: searchQuery && (
+            <InputAdornment position="end">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setSearchQuery('');
+                  handleSearch('');
+                }}
+                sx={{ fontSize: '0.75rem' }}
+              >
+                <ClearIcon sx={{ fontSize: '0.75rem' }} />
+              </IconButton>
+            </InputAdornment>
+          ),
+          sx: {
+            fontSize: '0.75rem',
+            '& .MuiInputBase-input': {
+              py: 1,
+            },
+          },
         }}
       />
     </Box>

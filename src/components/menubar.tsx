@@ -17,24 +17,27 @@ const MenuBar: React.FC = () => {
             elevation={0}
             sx={{
                 backgroundColor: 'var(--background)',
-                borderBottom: '1px solid var(--border)',
             }}
         >
-            <Toolbar>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Toolbar sx={{ justifyContent: 'space-between' }}>
+                <Box sx={{ flex: 1 }} />
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 0.5
+                }}>
                     <Image
                         src={logo}
                         alt="Minerva Logo"
                         width={32}
                         height={32}
-                        style={{ marginRight: '8px' }}
                     />
                     <Typography variant="h6" component="div">
                         Minerva
                     </Typography>
                 </Box>
-                <Box sx={{ flexGrow: 1 }} />
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
                     <ThemeToggle />
                 </Box>
             </Toolbar>
