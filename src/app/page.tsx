@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react';
 import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Box, TextField, MenuItem, FormControl, InputLabel, Select, IconButton, Tooltip, SelectChangeEvent } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ClearIcon from '@mui/icons-material/Clear';
+import dynamic from 'next/dynamic';
+
+// Dynamically import SearchWrapper with SSR disabled
+const SearchWrapper = dynamic(() => import('@/components/SearchWrapper'), {
+  ssr: false
+});
 
 interface Book {
   id: string;  // Unique ID (UUID)
@@ -169,6 +175,11 @@ export default function Home() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Add SearchWrapper at the top */}
+      <Box sx={{ mb: 4 }}>
+        <SearchWrapper />
+      </Box>
+
       {/* Sorting and Filtering Controls */}
       <Box
         sx={{
