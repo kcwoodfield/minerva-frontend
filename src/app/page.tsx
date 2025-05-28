@@ -7,39 +7,13 @@ import ClearIcon from '@mui/icons-material/Clear';
 import dynamic from 'next/dynamic';
 import { InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import BookDetails from '@/components/BookDetails';
+import { Book } from '@/types/book';
 
 // Dynamically import SearchWrapper with SSR disabled
 const SearchWrapper = dynamic(() => import('@/components/SearchWrapper'), {
   ssr: false
 });
-
-interface Book {
-  id: string;  // Unique ID (UUID)
-  title: string;
-  author: string;
-  isbn_13: string;
-  isbn_10: string | null;
-  publisher: string;
-  publication_date: string;
-  genre: string;
-  sub_genre: string;
-  language: string;
-  pages: number;
-  format: string;
-  edition: string;
-  summary: string;
-  tags: string[];
-  cover_image_url: string;
-  rating: number;
-  related_books: {
-    title: string;
-    author: string;
-    isbn_13: string;
-  }[];
-  series_info: string | null;
-  completed: boolean;
-  date_added: string;
-}
 
 function PageContent() {
   const router = useRouter();
@@ -67,6 +41,8 @@ function PageContent() {
   const [sortBy, setSortBy] = useState('title');
   const [sortOrder, setSortOrder] = useState('asc');
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   useEffect(() => {
     setPage(initialPage);
@@ -185,6 +161,10 @@ function PageContent() {
       params.set('completed', completed);
       router.push(`/?${params.toString()}`);
     }
+  };
+
+  const handleBookClick = (book: Book) => {
+    setSelectedBook(book);
   };
 
   if (loading) {
@@ -316,7 +296,8 @@ function PageContent() {
                     fontWeight: sort === col.key ? '700' : '600',
                     fontSize: '0.75rem',
                     padding: '8px 16px',
-                    letterSpacing: '0.025em'
+                    letterSpacing: '0.025em',
+                    borderBottom: 'none'
                   }}
                 >
                   {col.label}
@@ -329,13 +310,23 @@ function PageContent() {
           </TableHead>
           <TableBody>
             {books.map(book => (
-              <TableRow key={book.id}>
-                <TableCell className="font-medium">{book.title}</TableCell>
-                <TableCell>{book.author}</TableCell>
-                <TableCell className="hidden md:table-cell">{book.pages}</TableCell>
-                <TableCell className="hidden md:table-cell">{book.rating}</TableCell>
-                <TableCell className="hidden md:table-cell">{book.completed ? 'Yes' : 'No'}</TableCell>
-                <TableCell className="hidden md:table-cell">
+              <TableRow
+                key={book.id}
+                onClick={() => handleBookClick(book)}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    backgroundColor: '#f2f2f6',
+                    transition: 'background-color 0.2s ease'
+                  }
+                }}
+              >
+                <TableCell className="font-medium" sx={{ borderBottom: 'none' }}>{book.title}</TableCell>
+                <TableCell sx={{ borderBottom: 'none' }}>{book.author}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.pages}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.rating}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.completed ? 'Yes' : 'No'}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>
                   {new Date(book.date_added).toLocaleDateString()}
                 </TableCell>
               </TableRow>
@@ -368,6 +359,12 @@ function PageContent() {
           Next
         </Button>
       </Box>
+
+      <BookDetails
+        book={selectedBook}
+        open={!!selectedBook}
+        onClose={() => setSelectedBook(null)}
+      />
     </Container>
   );
 }

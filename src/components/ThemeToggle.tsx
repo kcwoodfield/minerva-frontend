@@ -25,6 +25,10 @@ export default function ThemeToggle() {
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         sx={{
           color: 'inherit',
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
           '&:hover': {
             backgroundColor: 'rgba(0, 0, 0, 0.04)',
           },

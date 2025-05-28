@@ -6,6 +6,7 @@ import Image from 'next/image';
 import AddBook from "@/components/addbook";
 import { AppBar, Toolbar, Typography, Box } from '@mui/material';
 import ThemeToggle from './ThemeToggle';
+import Subtitle from './Subtitle';
 
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
@@ -38,17 +39,7 @@ const MenuBar: React.FC = () => {
                     <Typography variant="h6" component="div">
                         Minerva
                     </Typography>
-                    <Typography
-                        variant="subtitle2"
-                        component="div"
-                        sx={{
-                            color: 'var(--muted-foreground)',
-                            fontSize: '0.75rem',
-                            letterSpacing: '0.025em'
-                        }}
-                    >
-                        A Labyrinth of Pages
-                    </Typography>
+                    <Subtitle />
                 </Box>
                 <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
                     <ThemeToggle />
