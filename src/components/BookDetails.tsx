@@ -77,12 +77,14 @@ export default function BookDetails({ book, open, onClose, onDelete }: BookDetai
         }}
       >
         <DialogTitle>
-          <Typography variant="h5" component="div" sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
-            {book.title}
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            by {book.author}
-          </Typography>
+          <Box>
+            <Typography variant="h5" component="div" sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
+              {book.title}
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              by {book.author}
+            </Typography>
+          </Box>
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={3}>
