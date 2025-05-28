@@ -1,15 +1,18 @@
 "use client"
 
 import React from 'react';
-import logo from '/public/logo/logo.png';
+import logoLight from '/public/logo/minerva-logo.png';
+import logoDark from '/public/logo/minerva-logo-dark.png';
 import Image from 'next/image';
 import AddBook from "@/components/addbook";
 import { AppBar, Toolbar, Typography, Box } from '@mui/material';
 import ThemeToggle from './ThemeToggle';
 import Subtitle from './Subtitle';
+import { useTheme } from 'next-themes';
 
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
+    const { resolvedTheme } = useTheme();
 
     return (
         <AppBar
@@ -31,12 +34,12 @@ const MenuBar: React.FC = () => {
                     }
                 }}>
                     <Image
-                        src={logo}
+                        src={resolvedTheme === 'dark' ? logoDark : logoLight}
                         alt="Minerva Logo"
-                        width={64}
-                        height={64}
+                        width={80}
+                        height={80}
                     />
-                    <Typography variant="h6" component="div">
+                    <Typography variant="h6" component="div" sx={{ fontSize: '2rem', mb: 0 }}>
                         Minerva
                     </Typography>
                     <Subtitle />

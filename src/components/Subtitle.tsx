@@ -28,8 +28,9 @@ export default function Subtitle() {
       component="div"
       sx={{
         color: 'var(--muted-foreground)',
-        fontSize: '0.75rem',
-        letterSpacing: '0.025em'
+        fontSize: '1rem',
+        letterSpacing: '0.025em',
+        mt: -0.5
       }}
     >
       {subtitle}

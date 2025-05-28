@@ -32,6 +32,8 @@ function PageContent() {
   const [page, setPage] = useState(initialPage);
   const [limit, setLimit] = useState(initialLimit);
   const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+  const [filteredTotal, setFilteredTotal] = useState(0);
   const [sort, setSort] = useState(initialSort);
   const [order, setOrder] = useState<'asc' | 'desc'>(initialOrder as 'asc' | 'desc');
   const [completed, setCompleted] = useState(initialCompleted);
@@ -75,6 +77,18 @@ function PageContent() {
         const data = await response.json();
         setBooks(data.items);
         setTotalPages(data.pages);
+        setFilteredTotal(data.total);
+
+        // Fetch total books without filters
+        const totalParams = new URLSearchParams();
+        if (query) {
+          totalParams.set('q', query);
+        }
+        const totalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${totalParams.toString()}&limit=1`);
+        if (totalResponse.ok) {
+          const totalData = await totalResponse.json();
+          setTotalItems(totalData.total);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -196,14 +210,14 @@ function PageContent() {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="caption" sx={{ mr: 1 }}>Show:</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              {[10, 50, 'all'].map((size) => (
+              {[10, 'all'].map((size) => (
                 <Button
                   key={size}
                   size="small"
                   sx={{ fontSize: '0.75rem', minWidth: '32px', padding: '2px 8px' }}
-                  variant={limit === (size === 'all' ? totalPages * 10 : size) ? 'contained' : 'outlined'}
+                  variant={limit === (size === 'all' ? 100 : Number(size)) ? 'contained' : 'outlined'}
                   onClick={() => {
-                    const newLimit = size === 'all' ? totalPages * 10 : size;
+                    const newLimit = size === 'all' ? 100 : Number(size);
                     const params = new URLSearchParams(searchParams.toString());
                     params.set('limit', newLimit.toString());
                     params.set('page', '1');
@@ -216,7 +230,7 @@ function PageContent() {
             </Box>
           </Box>
           <Typography variant="caption" color="text.secondary">
-            Showing {((page - 1) * limit) + 1}-{Math.min(page * limit, totalPages * 10)} of {totalPages * 10} books
+            Showing {books.length} of {totalItems} books {filteredTotal !== totalItems && `(${filteredTotal} match current filter)`}
           </Typography>
         </Box>
 
@@ -236,24 +250,6 @@ function PageContent() {
               <MenuItem value="false" sx={{ fontSize: '0.75rem' }}>Not Completed</MenuItem>
             </Select>
           </FormControl>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>Sort by date:</Typography>
-            <Button
-              size="small"
-              sx={{ fontSize: '0.75rem', minWidth: '32px', padding: '2px 8px' }}
-              variant={sort === 'date_added' ? 'contained' : 'outlined'}
-              onClick={() => {
-                const newOrder = sort === 'date_added' && order === 'asc' ? 'desc' : 'asc';
-                const params = new URLSearchParams(searchParams.toString());
-                params.set('sort', 'date_added');
-                params.set('order', newOrder);
-                params.set('page', '1');
-                router.push(`/?${params.toString()}`);
-              }}
-            >
-              {sort === 'date_added' ? (order === 'asc' ? 'Newest' : 'Oldest') : 'Date'}
-            </Button>
-          </Box>
           <Tooltip title="Clear filters and sorting">
             <IconButton onClick={handleClear} size="small">
               <ClearIcon sx={{ fontSize: '1rem' }} />
@@ -262,7 +258,16 @@ function PageContent() {
         </Box>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          bgcolor: 'background.default',
+          '& .MuiPaper-root': {
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : 'background.default',
+          },
+          pb: 2
+        }}
+      >
         <Table>
           <TableHead>
             <TableRow>
@@ -294,7 +299,7 @@ function PageContent() {
                   sx={{
                     cursor: 'pointer',
                     fontWeight: sort === col.key ? '700' : '600',
-                    fontSize: '0.75rem',
+                    fontSize: '0.875rem',
                     padding: '8px 16px',
                     letterSpacing: '0.025em',
                     borderBottom: 'none'
@@ -316,7 +321,7 @@ function PageContent() {
                 sx={{
                   cursor: 'pointer',
                   '&:hover': {
-                    backgroundColor: '#f2f2f6',
+                    backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2a2a2a' : '#f2f2f6',
                     transition: 'background-color 0.2s ease'
                   }
                 }}
@@ -338,22 +343,38 @@ function PageContent() {
         <Button
           disabled={page === 1}
           onClick={() => handlePageChange(page - 1)}
+          variant="contained"
+          size="small"
           sx={{
             fontFamily: 'var(--font-eb-garamond)',
-            fontSize: '0.875rem'
+            fontSize: '0.75rem',
+            px: 1.5,
+            py: 0.5,
+            minWidth: '80px',
+            textTransform: 'none'
           }}
         >
           Previous
         </Button>
-        <Typography sx={{ mx: 2, fontFamily: 'var(--font-eb-garamond)' }}>
+        <Typography sx={{
+          mx: 2,
+          fontFamily: 'var(--font-eb-garamond)',
+          pt: 1
+        }}>
           Page {page} of {totalPages}
         </Typography>
         <Button
           disabled={page === totalPages}
           onClick={() => handlePageChange(page + 1)}
+          variant="contained"
+          size="small"
           sx={{
             fontFamily: 'var(--font-eb-garamond)',
-            fontSize: '0.875rem'
+            fontSize: '0.75rem',
+            px: 1.5,
+            py: 0.5,
+            minWidth: '80px',
+            textTransform: 'none'
           }}
         >
           Next

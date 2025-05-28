@@ -22,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={ebGaramond.variable}>
-      <body className={`${ebGaramond.className} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${ebGaramond.variable} antialiased`} suppressHydrationWarning>
         <Providers>
           <MenuBar />
           {children}

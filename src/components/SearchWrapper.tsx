@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TextField, InputAdornment, IconButton, Box } from '@mui/material';
+import { TextField, InputAdornment, IconButton, Box, Button } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -46,6 +46,20 @@ export default function SearchWrapper() {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         onKeyDown={handleKeyDown}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: 'white',
+            '& fieldset': {
+              borderColor: 'rgba(0, 0, 0, 0.23)',
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(0, 0, 0, 0.23)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: 'primary.main',
+            },
+          },
+        }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -54,16 +68,28 @@ export default function SearchWrapper() {
           ),
           endAdornment: searchQuery && (
             <InputAdornment position="end">
-              <IconButton
+              <Button
                 size="small"
                 onClick={() => {
                   setSearchQuery('');
                   handleSearch('');
                 }}
-                sx={{ fontSize: '0.75rem' }}
+                startIcon={<ClearIcon sx={{ fontSize: '0.75rem' }} />}
+                sx={{
+                  fontSize: '0.75rem',
+                  minWidth: 'auto',
+                  px: 1,
+                  py: 0.5,
+                  color: 'text.secondary',
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                    color: 'text.primary'
+                  }
+                }}
               >
-                <ClearIcon sx={{ fontSize: '0.75rem' }} />
-              </IconButton>
+                Clear
+              </Button>
             </InputAdornment>
           ),
           sx: {
