@@ -170,7 +170,15 @@ export default function Home() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Sorting and Filtering Controls */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 2,
+          gap: 2
+        }}
+      >
         <TextField
           size="small"
           label="Filter by Title/Author"
