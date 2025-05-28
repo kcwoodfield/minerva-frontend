@@ -295,9 +295,10 @@ export default function Home() {
                   }}
                   sx={{
                     cursor: 'pointer',
-                    fontWeight: sort === col.key ? 'bold' : 'normal',
+                    fontWeight: sort === col.key ? '700' : '600',
                     fontSize: '0.75rem',
-                    padding: '8px 16px'
+                    padding: '8px 16px',
+                    letterSpacing: '0.025em'
                   }}
                 >
                   {col.label}

@@ -18,6 +18,9 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        'eb-garamond': ['var(--font-eb-garamond)'],
+      },
       colors: {
         light: "rgba(255,254,250,1)",
         border: "hsl(var(--border))",

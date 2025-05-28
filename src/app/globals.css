@@ -2,6 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #fafafa;
+  --foreground: #171717;
+  --border: #e5e5e5;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1f2937;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #1f2937;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --ring: #d1d5db;
+}
+
+.dark {
+  --background: #171717;
+  --foreground: #fafafa;
+  --border: #404040;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #262626;
+  --secondary-foreground: #f3f4f6;
+  --muted: #262626;
+  --muted-foreground: #9ca3af;
+  --accent: #262626;
+  --accent-foreground: #f3f4f6;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --ring: #404040;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+    background-color: var(--background);
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -58,3 +104,11 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+@layer base {
+  body {
+    @apply font-eb-garamond;
+  }
+}
+
+/* Add any other global styles below */

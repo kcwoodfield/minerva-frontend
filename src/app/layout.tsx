@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { Providers } from './providers'
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
 import MenuBar from "@/components/menubar";
+import './globals.css'
+import { EB_Garamond } from 'next/font/google'
 
-import "./globals.css";
+const ebGaramond = EB_Garamond({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-eb-garamond',
+})
 
 export const metadata: Metadata = {
   title: "Minerva, organize your books.",
@@ -17,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={GeistMono.className}>
+    <html lang="en" className={ebGaramond.variable}>
+      <body className={`${ebGaramond.className} antialiased`}>
         <Providers>
           <MenuBar />
           {children}
