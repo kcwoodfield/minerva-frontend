@@ -4,10 +4,12 @@ import { useEffect, useState, Suspense } from 'react';
 import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Box, TextField, MenuItem, FormControl, InputLabel, Select, IconButton, Tooltip, SelectChangeEvent } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ClearIcon from '@mui/icons-material/Clear';
+import AddIcon from '@mui/icons-material/Add';
 import dynamic from 'next/dynamic';
 import { InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import BookDetails from '@/components/BookDetails';
+import AddBookModal from '@/components/AddBookModal';
 import { Book } from '@/types/book';
 
 // Dynamically import SearchWrapper with SSR disabled
@@ -45,6 +47,7 @@ function PageContent() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     setPage(initialPage);
@@ -199,12 +202,40 @@ function PageContent() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      <IconButton
+        size="small"
+        onClick={() => setIsAddModalOpen(true)}
+        sx={{
+          position: 'fixed',
+          left: 16,
+          top: 16,
+          zIndex: 1000,
+          backgroundColor: 'background.paper',
+          boxShadow: 1,
+          '&:hover': {
+            backgroundColor: 'action.hover',
+          },
+        }}
+      >
+        <AddIcon />
+      </IconButton>
+
+      <AddBookModal
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
+
       <Box sx={{ mb: 4 }}>
         <SearchWrapper />
       </Box>
 
       {/* Controls row */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        mb: 2,
+        justifyContent: 'space-between'
+      }}>
         {/* Left side - Items per page selector */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -234,7 +265,7 @@ function PageContent() {
           </Typography>
         </Box>
 
-        {/* Right side - Completed filter and clear button */}
+        {/* Right side - Completed filter */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel id="completed-label" sx={{ fontSize: '0.75rem' }}>Completed</InputLabel>
@@ -251,7 +282,16 @@ function PageContent() {
             </Select>
           </FormControl>
           <Tooltip title="Clear filters and sorting">
-            <IconButton onClick={handleClear} size="small">
+            <IconButton
+              onClick={handleClear}
+              size="small"
+              sx={{
+                fontSize: '0.75rem',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                },
+              }}
+            >
               <ClearIcon sx={{ fontSize: '1rem' }} />
             </IconButton>
           </Tooltip>
@@ -272,12 +312,12 @@ function PageContent() {
           <TableHead>
             <TableRow>
               {[
-                { key: 'title', label: 'Title' },
-                { key: 'author', label: 'Author' },
-                { key: 'pages', label: 'Length (Pages)' },
-                { key: 'rating', label: 'Rating' },
-                { key: 'completed', label: 'Completed' },
-                { key: 'date_added', label: 'Date Added' },
+                { key: 'title', label: 'Title', width: '300px' },
+                { key: 'author', label: 'Author', width: '200px' },
+                { key: 'pages', label: 'Length (Pages)', width: '120px' },
+                { key: 'rating', label: 'Rating', width: '100px' },
+                { key: 'completed', label: 'Completed', width: '100px' },
+                { key: 'date_added', label: 'Date Added', width: '120px' },
               ].map(col => (
                 <TableCell
                   key={col.key}
@@ -302,7 +342,10 @@ function PageContent() {
                     fontSize: '0.875rem',
                     padding: '8px 16px',
                     letterSpacing: '0.025em',
-                    borderBottom: 'none'
+                    borderBottom: 'none',
+                    width: col.width,
+                    minWidth: col.width,
+                    maxWidth: col.width
                   }}
                 >
                   {col.label}
@@ -326,7 +369,18 @@ function PageContent() {
                   }
                 }}
               >
-                <TableCell className="font-medium" sx={{ borderBottom: 'none' }}>{book.title}</TableCell>
+                <TableCell
+                  className="font-medium"
+                  sx={{
+                    borderBottom: 'none',
+                    maxWidth: '300px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {book.title}
+                </TableCell>
                 <TableCell sx={{ borderBottom: 'none' }}>{book.author}</TableCell>
                 <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.pages}</TableCell>
                 <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.rating}</TableCell>

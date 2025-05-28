@@ -17,20 +17,40 @@ const subtitles = [
 export default function Subtitle() {
   const [subtitle, setSubtitle] = useState('');
 
-  useEffect(() => {
+  const getRandomSubtitle = () => {
     const randomIndex = Math.floor(Math.random() * subtitles.length);
-    setSubtitle(subtitles[randomIndex]);
+    return subtitles[randomIndex];
+  };
+
+  useEffect(() => {
+    setSubtitle(getRandomSubtitle());
   }, []);
+
+  const handleClick = () => {
+    let newSubtitle;
+    do {
+      newSubtitle = getRandomSubtitle();
+    } while (newSubtitle === subtitle && subtitles.length > 1);
+    setSubtitle(newSubtitle);
+  };
 
   return (
     <Typography
       variant="subtitle2"
       component="div"
+      onClick={handleClick}
       sx={{
         color: 'var(--muted-foreground)',
         fontSize: '1rem',
         letterSpacing: '0.025em',
-        mt: -0.5
+        mt: -0.5,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          opacity: 0.8,
+          transform: 'scale(1.02)',
+          color: 'var(--foreground)'
+        }
       }}
     >
       {subtitle}
