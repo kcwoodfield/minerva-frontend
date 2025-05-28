@@ -3,7 +3,6 @@
 import React from 'react';
 import logo from '/public/logo/logo.png';
 import Image from 'next/image';
-import { TextField } from '@mui/material';
 import AddBook from "@/components/addbook";
 
 const MenuBar: React.FC = () => {
@@ -23,12 +22,6 @@ const MenuBar: React.FC = () => {
                                     title="Minerva, organize your books."
                                     width={75} />
                             </a>
-                            <TextField
-                                placeholder="Search for a book..."
-                                variant="outlined"
-                                size="small"
-                                sx={{ ml: 2 }}
-                            />
                             <AddBook />
                         </div>
                     </div>

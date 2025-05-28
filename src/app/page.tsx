@@ -36,6 +36,7 @@ interface Book {
   }[];
   series_info: string | null;
   completed: boolean;
+  date_added: string;
 }
 
 export default function Home() {
@@ -46,8 +47,8 @@ export default function Home() {
   const initialLimit = parseInt(searchParams.get('limit') || '10', 10);
   const initialSort = searchParams.get('sort') || 'title';
   const initialOrder = searchParams.get('order') || 'asc';
-  const initialFilter = searchParams.get('filter') || '';
   const initialCompleted = searchParams.get('completed') || 'all';
+  const initialQuery = searchParams.get('q') || '';
 
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,18 +58,18 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(0);
   const [sort, setSort] = useState(initialSort);
   const [order, setOrder] = useState<'asc' | 'desc'>(initialOrder as 'asc' | 'desc');
-  const [filter, setFilter] = useState(initialFilter);
   const [completed, setCompleted] = useState(initialCompleted);
+  const [query, setQuery] = useState(initialQuery);
 
   useEffect(() => {
     setPage(initialPage);
     setLimit(initialLimit);
     setSort(initialSort);
     setOrder(initialOrder as 'asc' | 'desc');
-    setFilter(initialFilter);
     setCompleted(initialCompleted);
+    setQuery(initialQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialPage, initialLimit, initialSort, initialOrder, initialFilter, initialCompleted]);
+  }, [initialPage, initialLimit, initialSort, initialOrder, initialCompleted, initialQuery]);
 
   useEffect(() => {
     async function fetchBooks() {
@@ -79,9 +80,11 @@ export default function Home() {
           limit: limit.toString(),
           sort,
           order,
-          filter,
           completed,
         });
+        if (query) {
+          params.set('q', query);
+        }
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${params.toString()}`);
         if (!response.ok) {
           throw new Error("Failed to fetch books");
@@ -96,7 +99,7 @@ export default function Home() {
       }
     }
     fetchBooks();
-  }, [page, limit, sort, order, filter, completed]);
+  }, [page, limit, sort, order, completed, query]);
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -104,8 +107,10 @@ export default function Home() {
     params.set('limit', limit.toString());
     params.set('sort', sort);
     params.set('order', order);
-    params.set('filter', filter);
     params.set('completed', completed);
+    if (query) {
+      params.set('q', query);
+    }
     router.push(`/?${params.toString()}`);
   };
 
@@ -115,7 +120,9 @@ export default function Home() {
     params.set('sort', newSort);
     params.set('order', order);
     params.set('page', '1');
-    params.set('filter', filter);
+    if (query) {
+      params.set('q', query);
+    }
     params.set('completed', completed);
     router.push(`/?${params.toString()}`);
   };
@@ -126,15 +133,17 @@ export default function Home() {
     params.set('order', newOrder);
     params.set('sort', sort);
     params.set('page', '1');
-    params.set('filter', filter);
+    if (query) {
+      params.set('q', query);
+    }
     params.set('completed', completed);
     router.push(`/?${params.toString()}`);
   };
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newFilter = event.target.value;
+    const newQuery = event.target.value;
     const params = new URLSearchParams(searchParams.toString());
-    params.set('filter', newFilter);
+    params.set('q', newQuery);
     params.set('page', '1');
     params.set('sort', sort);
     params.set('order', order);
@@ -149,7 +158,9 @@ export default function Home() {
     params.set('page', '1');
     params.set('sort', sort);
     params.set('order', order);
-    params.set('filter', filter);
+    if (query) {
+      params.set('q', query);
+    }
     router.push(`/?${params.toString()}`);
   };
 
@@ -180,41 +191,79 @@ export default function Home() {
         <SearchWrapper />
       </Box>
 
-      {/* Sorting and Filtering Controls */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          mb: 2,
-          gap: 2
-        }}
-      >
-        <TextField
-          size="small"
-          label="Filter by Title/Author"
-          value={filter}
-          onChange={handleFilterChange}
-        />
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel id="completed-label">Completed</InputLabel>
-          <Select
-            labelId="completed-label"
-            value={completed}
-            label="Completed"
-            onChange={handleCompletedChange}
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="true">Completed</MenuItem>
-            <MenuItem value="false">Not Completed</MenuItem>
-          </Select>
-        </FormControl>
-        <Tooltip title="Clear filters and sorting">
-          <IconButton onClick={handleClear}>
-            <ClearIcon />
-          </IconButton>
-        </Tooltip>
+      {/* Controls row */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
+        {/* Left side - Items per page selector */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="caption" sx={{ mr: 1 }}>Show:</Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {[10, 50, 'all'].map((size) => (
+                <Button
+                  key={size}
+                  size="small"
+                  sx={{ fontSize: '0.75rem', minWidth: '32px', padding: '2px 8px' }}
+                  variant={limit === (size === 'all' ? totalPages * 10 : size) ? 'contained' : 'outlined'}
+                  onClick={() => {
+                    const newLimit = size === 'all' ? totalPages * 10 : size;
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('limit', newLimit.toString());
+                    params.set('page', '1');
+                    router.push(`/?${params.toString()}`);
+                  }}
+                >
+                  {size}
+                </Button>
+              ))}
+            </Box>
+          </Box>
+          <Typography variant="caption" color="text.secondary">
+            Showing {((page - 1) * limit) + 1}-{Math.min(page * limit, totalPages * 10)} of {totalPages * 10} books
+          </Typography>
+        </Box>
+
+        {/* Right side - Completed filter and clear button */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel id="completed-label" sx={{ fontSize: '0.75rem' }}>Completed</InputLabel>
+            <Select
+              labelId="completed-label"
+              value={completed}
+              label="Completed"
+              onChange={handleCompletedChange}
+              sx={{ fontSize: '0.75rem' }}
+            >
+              <MenuItem value="all" sx={{ fontSize: '0.75rem' }}>All</MenuItem>
+              <MenuItem value="true" sx={{ fontSize: '0.75rem' }}>Completed</MenuItem>
+              <MenuItem value="false" sx={{ fontSize: '0.75rem' }}>Not Completed</MenuItem>
+            </Select>
+          </FormControl>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>Sort by date:</Typography>
+            <Button
+              size="small"
+              sx={{ fontSize: '0.75rem', minWidth: '32px', padding: '2px 8px' }}
+              variant={sort === 'date_added' ? 'contained' : 'outlined'}
+              onClick={() => {
+                const newOrder = sort === 'date_added' && order === 'asc' ? 'desc' : 'asc';
+                const params = new URLSearchParams(searchParams.toString());
+                params.set('sort', 'date_added');
+                params.set('order', newOrder);
+                params.set('page', '1');
+                router.push(`/?${params.toString()}`);
+              }}
+            >
+              {sort === 'date_added' ? (order === 'asc' ? 'Newest' : 'Oldest') : 'Date'}
+            </Button>
+          </Box>
+          <Tooltip title="Clear filters and sorting">
+            <IconButton onClick={handleClear} size="small">
+              <ClearIcon sx={{ fontSize: '1rem' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -225,6 +274,7 @@ export default function Home() {
                 { key: 'pages', label: 'Length (Pages)' },
                 { key: 'rating', label: 'Rating' },
                 { key: 'completed', label: 'Completed' },
+                { key: 'date_added', label: 'Date Added' },
               ].map(col => (
                 <TableCell
                   key={col.key}
@@ -237,11 +287,18 @@ export default function Home() {
                     params.set('sort', col.key);
                     params.set('order', newOrder);
                     params.set('page', '1');
-                    params.set('filter', filter);
+                    if (query) {
+                      params.set('q', query);
+                    }
                     params.set('completed', completed);
                     router.push(`/?${params.toString()}`);
                   }}
-                  style={{ cursor: 'pointer', fontWeight: sort === col.key ? 'bold' : 'normal' }}
+                  sx={{
+                    cursor: 'pointer',
+                    fontWeight: sort === col.key ? 'bold' : 'normal',
+                    fontSize: '0.75rem',
+                    padding: '8px 16px'
+                  }}
                 >
                   {col.label}
                   {sort === col.key && (
@@ -259,6 +316,9 @@ export default function Home() {
                 <TableCell className="hidden md:table-cell">{book.pages}</TableCell>
                 <TableCell className="hidden md:table-cell">{book.rating}</TableCell>
                 <TableCell className="hidden md:table-cell">{book.completed ? 'Yes' : 'No'}</TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {new Date(book.date_added).toLocaleDateString()}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
