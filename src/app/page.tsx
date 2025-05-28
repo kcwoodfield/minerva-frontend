@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Box, TextField, MenuItem, FormControl, InputLabel, Select, IconButton, Tooltip, SelectChangeEvent } from '@mui/material';
+import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Box, TextField, MenuItem, FormControl, InputLabel, Select, IconButton, Tooltip, SelectChangeEvent, Snackbar, Alert } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
@@ -22,7 +22,7 @@ function PageContent() {
   const searchParams = useSearchParams();
 
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
-  const initialLimit = parseInt(searchParams.get('limit') || '10', 10);
+  const initialLimit = parseInt(searchParams.get('limit') || '25', 10);
   const initialSort = searchParams.get('sort') || 'title';
   const initialOrder = searchParams.get('order') || 'asc';
   const initialCompleted = searchParams.get('completed') || 'all';
@@ -48,6 +48,7 @@ function PageContent() {
 
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   useEffect(() => {
     setPage(initialPage);
@@ -59,45 +60,46 @@ function PageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPage, initialLimit, initialSort, initialOrder, initialCompleted, initialQuery]);
 
-  useEffect(() => {
-    async function fetchBooks() {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({
-          page: page.toString(),
-          limit: limit.toString(),
-          sort,
-          order,
-          completed,
-        });
-        if (query) {
-          params.set('q', query);
-        }
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${params.toString()}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch books");
-        }
-        const data = await response.json();
-        setBooks(data.items);
-        setTotalPages(data.pages);
-        setFilteredTotal(data.total);
-
-        // Fetch total books without filters
-        const totalParams = new URLSearchParams();
-        if (query) {
-          totalParams.set('q', query);
-        }
-        const totalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${totalParams.toString()}&limit=1`);
-        if (totalResponse.ok) {
-          const totalData = await totalResponse.json();
-          setTotalItems(totalData.total);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
+  const fetchBooks = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        sort,
+        order,
+        completed,
+      });
+      if (query) {
+        params.set('q', query);
       }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch books");
+      }
+      const data = await response.json();
+      setBooks(data.items);
+      setTotalPages(data.pages);
+      setFilteredTotal(data.total);
+
+      // Fetch total books without filters
+      const totalParams = new URLSearchParams();
+      if (query) {
+        totalParams.set('q', query);
+      }
+      const totalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${totalParams.toString()}&limit=1`);
+      if (totalResponse.ok) {
+        const totalData = await totalResponse.json();
+        setTotalItems(totalData.total);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchBooks();
   }, [page, limit, sort, order, completed, query]);
 
@@ -184,6 +186,12 @@ function PageContent() {
     setSelectedBook(book);
   };
 
+  const handleBookDelete = () => {
+    setSelectedBook(null);
+    setDeleteSuccess(true);
+    fetchBooks();
+  };
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -201,7 +209,7 @@ function PageContent() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth={false} sx={{ py: 4, maxWidth: '1400px' }}>
       <IconButton
         size="small"
         onClick={() => setIsAddModalOpen(true)}
@@ -215,6 +223,7 @@ function PageContent() {
           '&:hover': {
             backgroundColor: 'action.hover',
           },
+          fontSize: '1.25rem'
         }}
       >
         <AddIcon />
@@ -239,13 +248,13 @@ function PageContent() {
         {/* Left side - Items per page selector */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="caption" sx={{ mr: 1 }}>Show:</Typography>
+            <Typography variant="caption" sx={{ mr: 1, fontSize: '0.875rem' }}>Show:</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              {[10, 'all'].map((size) => (
+              {[25, 'all'].map((size) => (
                 <Button
                   key={size}
                   size="small"
-                  sx={{ fontSize: '0.75rem', minWidth: '32px', padding: '2px 8px' }}
+                  sx={{ fontSize: '0.875rem', minWidth: '32px', padding: '2px 8px' }}
                   variant={limit === (size === 'all' ? 100 : Number(size)) ? 'contained' : 'outlined'}
                   onClick={() => {
                     const newLimit = size === 'all' ? 100 : Number(size);
@@ -260,7 +269,7 @@ function PageContent() {
               ))}
             </Box>
           </Box>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
             Showing {books.length} of {totalItems} books {filteredTotal !== totalItems && `(${filteredTotal} match current filter)`}
           </Typography>
         </Box>
@@ -268,17 +277,17 @@ function PageContent() {
         {/* Right side - Completed filter */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel id="completed-label" sx={{ fontSize: '0.75rem' }}>Completed</InputLabel>
+            <InputLabel id="completed-label" sx={{ fontSize: '0.875rem' }}>Completed</InputLabel>
             <Select
               labelId="completed-label"
               value={completed}
               label="Completed"
               onChange={handleCompletedChange}
-              sx={{ fontSize: '0.75rem' }}
+              sx={{ fontSize: '0.875rem' }}
             >
-              <MenuItem value="all" sx={{ fontSize: '0.75rem' }}>All</MenuItem>
-              <MenuItem value="true" sx={{ fontSize: '0.75rem' }}>Completed</MenuItem>
-              <MenuItem value="false" sx={{ fontSize: '0.75rem' }}>Not Completed</MenuItem>
+              <MenuItem value="all" sx={{ fontSize: '0.875rem' }}>All</MenuItem>
+              <MenuItem value="true" sx={{ fontSize: '0.875rem' }}>Completed</MenuItem>
+              <MenuItem value="false" sx={{ fontSize: '0.875rem' }}>Not Completed</MenuItem>
             </Select>
           </FormControl>
           <Tooltip title="Clear filters and sorting">
@@ -286,13 +295,13 @@ function PageContent() {
               onClick={handleClear}
               size="small"
               sx={{
-                fontSize: '0.75rem',
+                fontSize: '1rem',
                 '&:hover': {
                   backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 },
               }}
             >
-              <ClearIcon sx={{ fontSize: '1rem' }} />
+              <ClearIcon sx={{ fontSize: '1.25rem' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -339,8 +348,8 @@ function PageContent() {
                   sx={{
                     cursor: 'pointer',
                     fontWeight: sort === col.key ? '700' : '600',
-                    fontSize: '0.875rem',
-                    padding: '8px 16px',
+                    fontSize: '1rem',
+                    padding: '12px 16px',
                     letterSpacing: '0.025em',
                     borderBottom: 'none',
                     width: col.width,
@@ -376,16 +385,18 @@ function PageContent() {
                     maxWidth: '300px',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis'
+                    textOverflow: 'ellipsis',
+                    fontSize: '1rem',
+                    padding: '12px 16px'
                   }}
                 >
                   {book.title}
                 </TableCell>
-                <TableCell sx={{ borderBottom: 'none' }}>{book.author}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.pages}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.rating}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>{book.completed ? 'Yes' : 'No'}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none' }}>
+                <TableCell sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.author}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.pages}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.rating}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.completed ? 'Yes' : 'No'}</TableCell>
+                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>
                   {new Date(book.date_added).toLocaleDateString()}
                 </TableCell>
               </TableRow>
@@ -401,7 +412,7 @@ function PageContent() {
           size="small"
           sx={{
             fontFamily: 'var(--font-eb-garamond)',
-            fontSize: '0.75rem',
+            fontSize: '0.875rem',
             px: 1.5,
             py: 0.5,
             minWidth: '80px',
@@ -413,7 +424,8 @@ function PageContent() {
         <Typography sx={{
           mx: 2,
           fontFamily: 'var(--font-eb-garamond)',
-          pt: 1
+          pt: 1,
+          fontSize: '1rem'
         }}>
           Page {page} of {totalPages}
         </Typography>
@@ -424,7 +436,7 @@ function PageContent() {
           size="small"
           sx={{
             fontFamily: 'var(--font-eb-garamond)',
-            fontSize: '0.75rem',
+            fontSize: '0.875rem',
             px: 1.5,
             py: 0.5,
             minWidth: '80px',
@@ -439,11 +451,22 @@ function PageContent() {
         book={selectedBook}
         open={!!selectedBook}
         onClose={() => setSelectedBook(null)}
+        onDelete={handleBookDelete}
       />
+
+      <Snackbar
+        open={deleteSuccess}
+        autoHideDuration={3000}
+        onClose={() => setDeleteSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setDeleteSuccess(false)} severity="success" sx={{ width: '100%' }}>
+          Book deleted successfully
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
-
 export default function Home() {
   return (
     <Suspense fallback={
@@ -455,3 +478,4 @@ export default function Home() {
     </Suspense>
   );
 }
+

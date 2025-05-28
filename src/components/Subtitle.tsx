@@ -6,11 +6,7 @@ import { useEffect, useState } from 'react';
 const subtitles = [
   'A Library Worth the Gods',
   'Read Like a God',
-  'Minerva Keeps the Watch',
-  'Minerva Knows What You\'ve Read',
-  'The Wolf Guards the Lore',
   'The Moonlit Library of Thought',
-  'The Wolf Remembers Every Page',
   'A Labyrinth of Pages'
 ];
 
