@@ -3,7 +3,6 @@ import { Providers } from './providers'
 import MenuBar from "@/components/menubar";
 import './globals.css'
 import { EB_Garamond } from 'next/font/google'
-import LogoutButton from '@/components/LogoutButton';
 import { headers } from 'next/headers';
 
 const ebGaramond = EB_Garamond({
