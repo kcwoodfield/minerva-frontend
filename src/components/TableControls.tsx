@@ -63,7 +63,8 @@ export default function TableControls({
           >
             <MenuItem value="all" sx={{ fontSize: '0.875rem' }}>All</MenuItem>
             <MenuItem value="100" sx={{ fontSize: '0.875rem' }}>Completed</MenuItem>
-            <MenuItem value="0" sx={{ fontSize: '0.875rem' }}>Not Completed</MenuItem>
+            <MenuItem value="0" sx={{ fontSize: '0.875rem' }}>Not Started</MenuItem>
+            <MenuItem value="in_progress" sx={{ fontSize: '0.875rem' }}>In Progress</MenuItem>
           </Select>
         </FormControl>
         <Tooltip title="Clear filters and sorting">

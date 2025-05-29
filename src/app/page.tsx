@@ -240,6 +240,9 @@ function PageContent() {
         open={!!selectedBook}
         onClose={() => setSelectedBook(null)}
         onDelete={handleBookDelete}
+        onEdit={() => {
+          fetchBooks();
+        }}
       />
 
       <Snackbar

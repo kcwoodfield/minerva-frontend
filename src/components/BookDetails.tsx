@@ -5,18 +5,22 @@ import { Book } from '@/types/book';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import EditBookModal from './EditBookModal';
 
 interface BookDetailsProps {
   book: Book | null;
   open: boolean;
   onClose: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
 }
 
-export default function BookDetails({ book, open, onClose, onDelete }: BookDetailsProps) {
+export default function BookDetails({ book, open, onClose, onDelete, onEdit }: BookDetailsProps) {
   const [mounted, setMounted] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
@@ -68,13 +72,22 @@ export default function BookDetails({ book, open, onClose, onDelete }: BookDetai
         }}
       >
         <DialogTitle>
-          <Box>
-            <Typography variant="h5" component="div" sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
-              {book.title}
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              by {book.author}
-            </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box>
+              <Typography variant="h5" component="div" sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
+                {book.title}
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                by {book.author}
+              </Typography>
+            </Box>
+            <Button
+              onClick={() => setIsEditModalOpen(true)}
+              startIcon={<EditIcon />}
+              sx={{ fontFamily: 'var(--font-eb-garamond)' }}
+            >
+              Edit
+            </Button>
           </Box>
         </DialogTitle>
         <DialogContent>
@@ -174,6 +187,20 @@ export default function BookDetails({ book, open, onClose, onDelete }: BookDetai
           </Button>
         </DialogActions>
       </Dialog>
+
+      {book && (
+        <EditBookModal
+          book={book}
+          open={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSuccess={() => {
+            setIsEditModalOpen(false);
+            if (onEdit) {
+              onEdit();
+            }
+          }}
+        />
+      )}
 
       <Snackbar
         open={!!error}

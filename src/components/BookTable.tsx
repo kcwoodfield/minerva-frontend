@@ -88,7 +88,9 @@ export default function BookTable({ books, sort, order, onSort, onBookClick }: B
               <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.pages}</TableCell>
               <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.rating}</TableCell>
               <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>
-                {book.completed === 100 ? 'Yes' : `${book.completed}%`}
+                {book.completed === 0 ? 'Not Started' :
+                 book.completed === 100 ? 'Completed' :
+                 `In Progress (${book.completed}%)`}
               </TableCell>
               <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>
                 {new Date(book.date_added).toLocaleDateString()}
