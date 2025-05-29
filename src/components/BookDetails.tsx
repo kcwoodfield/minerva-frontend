@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import EditBookModal from './EditBookModal';
+import Image from 'next/image';
 
 interface BookDetailsProps {
   book: Book | null;
@@ -100,9 +101,11 @@ export default function BookDetails({ book, open, onClose, onDelete, onEdit }: B
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
             {book.cover_image_url && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                <img
+                <Image
                   src={book.cover_image_url}
                   alt={`Cover of ${book.title}`}
+                  width={200}
+                  height={300}
                   style={{ maxWidth: '200px', maxHeight: '300px', objectFit: 'contain' }}
                 />
               </Box>

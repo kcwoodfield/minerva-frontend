@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { Container, Typography, IconButton, Snackbar, Alert, Box } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
@@ -56,7 +56,7 @@ function PageContent() {
     setQuery(initialQuery);
   }, [initialPage, initialLimit, initialSort, initialOrder, initialCompleted, initialQuery]);
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -93,11 +93,11 @@ function PageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, sort, order, completed, query]);
 
   useEffect(() => {
     fetchBooks();
-  }, [page, limit, sort, order, completed, query]);
+  }, [fetchBooks]);
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());

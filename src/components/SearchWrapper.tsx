@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import { TextField, InputAdornment, IconButton, Box, Button, CircularProgress, Container, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -12,6 +12,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [isSearching, setIsSearching] = useState(false);
+  const debouncedSearchRef = useRef<ReturnType<typeof debounce>>();
 
   useEffect(() => {
     setSearchQuery(searchParams.get('q') || '');
@@ -19,7 +20,7 @@ function SearchContent() {
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce((query: string) => {
+    (query: string) => {
       const params = new URLSearchParams(searchParams.toString());
       if (query) {
         params.set('q', query);
@@ -29,18 +30,25 @@ function SearchContent() {
       params.set('page', '1');
       router.push(`/?${params.toString()}`);
       setIsSearching(false);
-    }, 300),
+    },
     [searchParams, router]
   );
 
-  const handleSearch = (query: string) => {
+  useEffect(() => {
+    debouncedSearchRef.current = debounce(debouncedSearch, 300);
+    return () => {
+      debouncedSearchRef.current?.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearch = useCallback((query: string) => {
     setIsSearching(true);
-    debouncedSearch(query);
-  };
+    debouncedSearchRef.current?.(query);
+  }, []);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      debouncedSearch.flush();
+      debouncedSearchRef.current?.flush();
     }
   };
 
