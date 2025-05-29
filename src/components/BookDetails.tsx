@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Grid, Rating, Alert, Snackbar } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Grid, Rating, Alert, Snackbar, LinearProgress } from '@mui/material';
 import { Book } from '@/types/book';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -17,25 +17,22 @@ export default function BookDetails({ book, open, onClose, onDelete }: BookDetai
   const [mounted, setMounted] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleDeleteClick = () => {
-    setShowDeleteConfirm(true);
-  };
+  const handleDelete = async () => {
+    if (!book || !window.confirm('Are you sure you want to delete this book?')) {
+      return;
+    }
 
-  const handleDeleteConfirm = async () => {
-    if (!book) return;
+    setIsDeleting(true);
+    setError(null);
 
     try {
-      setIsDeleting(true);
-      setError(null);
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}/${book.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${book.id}`, {
         method: 'DELETE',
       });
 
@@ -44,21 +41,15 @@ export default function BookDetails({ book, open, onClose, onDelete }: BookDetai
         throw new Error(data.detail || 'Failed to delete book');
       }
 
-      setShowDeleteConfirm(false);
       onClose();
       if (onDelete) {
         onDelete();
       }
-    } catch (error) {
-      console.error('Error deleting book:', error);
-      setError(error instanceof Error ? error.message : 'Failed to delete book');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsDeleting(false);
     }
-  };
-
-  const handleDeleteCancel = () => {
-    setShowDeleteConfirm(false);
   };
 
   if (!book || !mounted) return null;
@@ -68,7 +59,7 @@ export default function BookDetails({ book, open, onClose, onDelete }: BookDetai
       <Dialog
         open={open}
         onClose={onClose}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
@@ -87,160 +78,99 @@ export default function BookDetails({ book, open, onClose, onDelete }: BookDetai
           </Box>
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              {book.cover_image_url && (
-                <Box
-                  component="img"
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            {book.cover_image_url && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <img
                   src={book.cover_image_url}
                   alt={`Cover of ${book.title}`}
-                  sx={{
-                    width: '100%',
-                    height: 'auto',
-                    borderRadius: 1,
-                    boxShadow: 3,
-                  }}
+                  style={{ maxWidth: '200px', maxHeight: '300px', objectFit: 'contain' }}
                 />
-              )}
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Details
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      ISBN-13
-                    </Typography>
-                    <Typography variant="body1">
-                      {book.isbn_13}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      ISBN-10
-                    </Typography>
-                    <Typography variant="body1">
-                      {book.isbn_10 || 'N/A'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Publisher
-                    </Typography>
-                    <Typography variant="body1">
-                      {book.publisher}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Publication Date
-                    </Typography>
-                    <Typography variant="body1">
-                      {new Date(book.publication_date).toLocaleDateString()}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Pages
-                    </Typography>
-                    <Typography variant="body1">
-                      {book.pages}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" color="text.secondary">
-                      Rating
-                    </Typography>
-                    <Rating value={book.rating} readOnly precision={0.5} />
-                  </Grid>
-                </Grid>
               </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Summary
-                </Typography>
-                <Typography variant="body1">
-                  {book.summary}
-                </Typography>
+            )}
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">ISBN-13</Typography>
+              <Typography>{book.isbn_13}</Typography>
+            </Box>
+            {book.isbn_10 && (
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">ISBN-10</Typography>
+                <Typography>{book.isbn_10}</Typography>
               </Box>
-              {book.tags && book.tags.length > 0 && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Tags
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {book.tags.map((tag, index) => (
-                      <Typography
-                        key={index}
-                        variant="body2"
-                        sx={{
-                          backgroundColor: resolvedTheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                          padding: '4px 8px',
-                          borderRadius: 1,
-                        }}
-                      >
-                        {tag}
-                      </Typography>
-                    ))}
-                  </Box>
+            )}
+            {book.publisher && (
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">Publisher</Typography>
+                <Typography>{book.publisher}</Typography>
+              </Box>
+            )}
+            {book.publication_date && (
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">Publication Date</Typography>
+                <Typography>{book.publication_date}</Typography>
+              </Box>
+            )}
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">Pages</Typography>
+              <Typography>{book.pages}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">Rating</Typography>
+              <Typography>{book.rating}/5</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">Completion</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ width: '100%', mr: 1 }}>
+                  <LinearProgress variant="determinate" value={book.completed} />
                 </Box>
-              )}
-            </Grid>
-          </Grid>
+                <Box sx={{ minWidth: 35 }}>
+                  <Typography variant="body2" color="text.secondary">{`${book.completed}%`}</Typography>
+                </Box>
+              </Box>
+            </Box>
+            {book.summary && (
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">Summary</Typography>
+                <Typography>{book.summary}</Typography>
+              </Box>
+            )}
+            {book.tags && book.tags.length > 0 && (
+              <Box>
+                <Typography variant="subtitle2" color="text.secondary">Tags</Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {book.tags.map((tag) => (
+                    <Typography
+                      key={tag}
+                      variant="body2"
+                      sx={{
+                        backgroundColor: 'primary.main',
+                        color: 'primary.contrastText',
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                      }}
+                    >
+                      {tag}
+                    </Typography>
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={handleDeleteClick}
+            onClick={handleDelete}
             color="error"
             startIcon={<DeleteIcon />}
             disabled={isDeleting}
             sx={{ fontFamily: 'var(--font-eb-garamond)' }}
           >
-            {isDeleting ? 'Deleting...' : 'Delete Book'}
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
           <Button onClick={onClose} sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
             Close
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={showDeleteConfirm}
-        onClose={handleDeleteCancel}
-        maxWidth="xs"
-        fullWidth
-        PaperProps={{
-          sx: {
-            bgcolor: resolvedTheme === 'dark' ? 'background.paper' : 'background.paper',
-          }
-        }}
-      >
-        <DialogTitle sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
-          Confirm Delete
-        </DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
-            Are you sure you want to delete &ldquo;{book.title}&rdquo;? This action cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleDeleteCancel}
-            sx={{ fontFamily: 'var(--font-eb-garamond)' }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDeleteConfirm}
-            color="error"
-            variant="contained"
-            disabled={isDeleting}
-            sx={{ fontFamily: 'var(--font-eb-garamond)' }}
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

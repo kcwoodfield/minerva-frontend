@@ -18,9 +18,11 @@ import {
   IconButton,
   InputAdornment,
   Alert,
-  Snackbar
+  Snackbar,
+  Slider
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { useRouter } from 'next/navigation';
 
 interface AddBookModalProps {
   open: boolean;
@@ -29,6 +31,7 @@ interface AddBookModalProps {
 }
 
 export default function AddBookModal({ open, onClose, onSuccess }: AddBookModalProps) {
+  const router = useRouter();
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [isbn13, setIsbn13] = useState('');
@@ -46,7 +49,7 @@ export default function AddBookModal({ open, onClose, onSuccess }: AddBookModalP
   const [newTag, setNewTag] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [rating, setRating] = useState<number | null>(null);
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] = useState(0);
 
   // Form state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,16 +84,17 @@ export default function AddBookModal({ open, onClose, onSuccess }: AddBookModalP
     setTags([]);
     setCoverImageUrl('');
     setRating(null);
-    setCompleted(false);
+    setCompleted(0);
     setError(null);
   };
 
-  const handleSubmit = async () => {
-    try {
-      setIsSubmitting(true);
-      setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}`, {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,21 +120,19 @@ export default function AddBookModal({ open, onClose, onSuccess }: AddBookModalP
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.detail || 'Failed to add book');
       }
 
-      setSuccess(true);
+      router.refresh();
       resetForm();
       onClose();
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
-      console.error('Error adding book:', error);
-      setError(error instanceof Error ? error.message : 'Failed to add book');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -139,6 +141,10 @@ export default function AddBookModal({ open, onClose, onSuccess }: AddBookModalP
   const handleClose = () => {
     resetForm();
     onClose();
+  };
+
+  const handleSliderChange = (_event: Event, newValue: number | number[]) => {
+    setCompleted(newValue as number);
   };
 
   return (
@@ -337,15 +343,19 @@ export default function AddBookModal({ open, onClose, onSuccess }: AddBookModalP
                 </Box>
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={completed}
-                      onChange={(e) => setCompleted(e.target.checked)}
-                    />
-                  }
-                  label="Completed"
-                />
+                <Box sx={{ mt: 2 }}>
+                  <Typography gutterBottom>Completion Percentage</Typography>
+                  <Slider
+                    value={completed}
+                    onChange={handleSliderChange}
+                    valueLabelDisplay="auto"
+                    step={5}
+                    marks
+                    min={0}
+                    max={100}
+                    valueLabelFormat={(value) => `${value}%`}
+                  />
+                </Box>
               </Grid>
             </Grid>
           </Box>

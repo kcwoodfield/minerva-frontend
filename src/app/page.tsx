@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Box, TextField, MenuItem, FormControl, InputLabel, Select, IconButton, Tooltip, SelectChangeEvent, Snackbar, Alert } from '@mui/material';
+import { Container, Typography, IconButton, Snackbar, Alert, Box } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
-import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import dynamic from 'next/dynamic';
-import { InputAdornment } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import BookDetails from '@/components/BookDetails';
 import AddBookModal from '@/components/AddBookModal';
+import TableControls from '@/components/TableControls';
+import BookTable from '@/components/BookTable';
+import PaginationControls from '@/components/PaginationControls';
 import { Book } from '@/types/book';
+import { SelectChangeEvent } from '@mui/material/Select';
 
 // Dynamically import SearchWrapper with SSR disabled
 const SearchWrapper = dynamic(() => import('@/components/SearchWrapper'), {
@@ -41,14 +42,10 @@ function PageContent() {
   const [completed, setCompleted] = useState(initialCompleted);
   const [query, setQuery] = useState(initialQuery);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('title');
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [addSuccess, setAddSuccess] = useState(false);
 
   useEffect(() => {
     setPage(initialPage);
@@ -57,7 +54,6 @@ function PageContent() {
     setOrder(initialOrder as 'asc' | 'desc');
     setCompleted(initialCompleted);
     setQuery(initialQuery);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPage, initialLimit, initialSort, initialOrder, initialCompleted, initialQuery]);
 
   const fetchBooks = async () => {
@@ -116,24 +112,14 @@ function PageContent() {
     router.push(`/?${params.toString()}`);
   };
 
-  const handleSortChange = (event: SelectChangeEvent<string>) => {
-    const newSort = event.target.value as string;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('sort', newSort);
-    params.set('order', order);
-    params.set('page', '1');
-    if (query) {
-      params.set('q', query);
+  const handleSort = (column: string) => {
+    let newOrder = 'asc';
+    if (sort === column) {
+      newOrder = order === 'asc' ? 'desc' : 'asc';
     }
-    params.set('completed', completed);
-    router.push(`/?${params.toString()}`);
-  };
-
-  const handleOrderChange = () => {
-    const newOrder = order === 'asc' ? 'desc' : 'asc';
     const params = new URLSearchParams(searchParams.toString());
+    params.set('sort', column);
     params.set('order', newOrder);
-    params.set('sort', sort);
     params.set('page', '1');
     if (query) {
       params.set('q', query);
@@ -142,19 +128,8 @@ function PageContent() {
     router.push(`/?${params.toString()}`);
   };
 
-  const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = event.target.value;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('q', newQuery);
-    params.set('page', '1');
-    params.set('sort', sort);
-    params.set('order', order);
-    params.set('completed', completed);
-    router.push(`/?${params.toString()}`);
-  };
-
-  const handleCompletedChange = (event: SelectChangeEvent<string>) => {
-    const newCompleted = event.target.value as string;
+  const handleCompletedChange = (event: SelectChangeEvent) => {
+    const newCompleted = event.target.value;
     const params = new URLSearchParams(searchParams.toString());
     params.set('completed', newCompleted);
     params.set('page', '1');
@@ -168,18 +143,6 @@ function PageContent() {
 
   const handleClear = () => {
     router.push('/');
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('q', searchQuery);
-      params.set('page', '1');
-      params.set('sort', sortBy);
-      params.set('order', sortOrder);
-      params.set('completed', completed);
-      router.push(`/?${params.toString()}`);
-    }
   };
 
   const handleBookClick = (book: Book) => {
@@ -232,220 +195,45 @@ function PageContent() {
       <AddBookModal
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onSuccess={() => {
+          setIsAddModalOpen(false);
+          setAddSuccess(true);
+          fetchBooks();
+        }}
       />
 
       <Box sx={{ mb: 4 }}>
         <SearchWrapper />
       </Box>
 
-      {/* Controls row */}
-      <Box sx={{
-        display: 'flex',
-        alignItems: 'center',
-        mb: 2,
-        justifyContent: 'space-between'
-      }}>
-        {/* Left side - Items per page selector */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="caption" sx={{ mr: 1, fontSize: '0.875rem' }}>Show:</Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {[25, 'all'].map((size) => (
-                <Button
-                  key={size}
-                  size="small"
-                  sx={{ fontSize: '0.875rem', minWidth: '32px', padding: '2px 8px' }}
-                  variant={limit === (size === 'all' ? 100 : Number(size)) ? 'contained' : 'outlined'}
-                  onClick={() => {
-                    const newLimit = size === 'all' ? 100 : Number(size);
-                    const params = new URLSearchParams(searchParams.toString());
-                    params.set('limit', newLimit.toString());
-                    params.set('page', '1');
-                    router.push(`/?${params.toString()}`);
-                  }}
-                >
-                  {size}
-                </Button>
-              ))}
-            </Box>
-          </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-            Showing {books.length} of {totalItems} books {filteredTotal !== totalItems && `(${filteredTotal} match current filter)`}
-          </Typography>
-        </Box>
-
-        {/* Right side - Completed filter */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel id="completed-label" sx={{ fontSize: '0.875rem' }}>Completed</InputLabel>
-            <Select
-              labelId="completed-label"
-              value={completed}
-              label="Completed"
-              onChange={handleCompletedChange}
-              sx={{ fontSize: '0.875rem' }}
-            >
-              <MenuItem value="all" sx={{ fontSize: '0.875rem' }}>All</MenuItem>
-              <MenuItem value="true" sx={{ fontSize: '0.875rem' }}>Completed</MenuItem>
-              <MenuItem value="false" sx={{ fontSize: '0.875rem' }}>Not Completed</MenuItem>
-            </Select>
-          </FormControl>
-          <Tooltip title="Clear filters and sorting">
-            <IconButton
-              onClick={handleClear}
-              size="small"
-              sx={{
-                fontSize: '1rem',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-              }}
-            >
-              <ClearIcon sx={{ fontSize: '1.25rem' }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
-
-      <TableContainer
-        component={Paper}
-        sx={{
-          bgcolor: 'background.default',
-          '& .MuiPaper-root': {
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : 'background.default',
-          },
-          pb: 2
+      <TableControls
+        limit={limit}
+        totalItems={totalItems}
+        filteredTotal={filteredTotal}
+        completed={completed}
+        onLimitChange={(newLimit) => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('limit', newLimit.toString());
+          params.set('page', '1');
+          router.push(`/?${params.toString()}`);
         }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow>
-              {[
-                { key: 'title', label: 'Title', width: '300px' },
-                { key: 'author', label: 'Author', width: '200px' },
-                { key: 'pages', label: 'Length (Pages)', width: '120px' },
-                { key: 'rating', label: 'Rating', width: '100px' },
-                { key: 'completed', label: 'Completed', width: '100px' },
-                { key: 'date_added', label: 'Date Added', width: '120px' },
-              ].map(col => (
-                <TableCell
-                  key={col.key}
-                  onClick={() => {
-                    let newOrder = 'asc';
-                    if (sort === col.key) {
-                      newOrder = order === 'asc' ? 'desc' : 'asc';
-                    }
-                    const params = new URLSearchParams(searchParams.toString());
-                    params.set('sort', col.key);
-                    params.set('order', newOrder);
-                    params.set('page', '1');
-                    if (query) {
-                      params.set('q', query);
-                    }
-                    params.set('completed', completed);
-                    router.push(`/?${params.toString()}`);
-                  }}
-                  sx={{
-                    cursor: 'pointer',
-                    fontWeight: sort === col.key ? '700' : '600',
-                    fontSize: '1rem',
-                    padding: '12px 16px',
-                    letterSpacing: '0.025em',
-                    borderBottom: 'none',
-                    width: col.width,
-                    minWidth: col.width,
-                    maxWidth: col.width
-                  }}
-                >
-                  {col.label}
-                  {sort === col.key && (
-                    <span style={{ marginLeft: 4 }}>{order === 'asc' ? '↑' : '↓'}</span>
-                  )}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {books.map(book => (
-              <TableRow
-                key={book.id}
-                onClick={() => handleBookClick(book)}
-                sx={{
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2a2a2a' : '#f2f2f6',
-                    transition: 'background-color 0.2s ease'
-                  }
-                }}
-              >
-                <TableCell
-                  className="font-medium"
-                  sx={{
-                    borderBottom: 'none',
-                    maxWidth: '300px',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    fontSize: '1rem',
-                    padding: '12px 16px'
-                  }}
-                >
-                  {book.title}
-                </TableCell>
-                <TableCell sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.author}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.pages}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.rating}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.completed ? 'Yes' : 'No'}</TableCell>
-                <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>
-                  {new Date(book.date_added).toLocaleDateString()}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-        <Button
-          disabled={page === 1}
-          onClick={() => handlePageChange(page - 1)}
-          variant="contained"
-          size="small"
-          sx={{
-            fontFamily: 'var(--font-eb-garamond)',
-            fontSize: '0.875rem',
-            px: 1.5,
-            py: 0.5,
-            minWidth: '80px',
-            textTransform: 'none'
-          }}
-        >
-          Previous
-        </Button>
-        <Typography sx={{
-          mx: 2,
-          fontFamily: 'var(--font-eb-garamond)',
-          pt: 1,
-          fontSize: '1rem'
-        }}>
-          Page {page} of {totalPages}
-        </Typography>
-        <Button
-          disabled={page === totalPages}
-          onClick={() => handlePageChange(page + 1)}
-          variant="contained"
-          size="small"
-          sx={{
-            fontFamily: 'var(--font-eb-garamond)',
-            fontSize: '0.875rem',
-            px: 1.5,
-            py: 0.5,
-            minWidth: '80px',
-            textTransform: 'none'
-          }}
-        >
-          Next
-        </Button>
-      </Box>
+        onCompletedChange={handleCompletedChange}
+        onClear={handleClear}
+      />
+
+      <BookTable
+        books={books}
+        sort={sort}
+        order={order}
+        onSort={handleSort}
+        onBookClick={handleBookClick}
+      />
+
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
 
       <BookDetails
         book={selectedBook}
@@ -464,9 +252,22 @@ function PageContent() {
           Book deleted successfully
         </Alert>
       </Snackbar>
+
+      <Snackbar
+        open={addSuccess}
+        autoHideDuration={3000}
+        onClose={() => setAddSuccess(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ zIndex: 9999 }}
+      >
+        <Alert onClose={() => setAddSuccess(false)} severity="success" sx={{ width: '100%' }}>
+          Book added successfully
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
+
 export default function Home() {
   return (
     <Suspense fallback={

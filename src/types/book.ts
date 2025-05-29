@@ -22,6 +22,6 @@ export interface Book {
     isbn_13: string;
   }[];
   series_info: string | null;
-  completed: boolean;
+  completed: number;
   date_added: string;
 }
