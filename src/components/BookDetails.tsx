@@ -82,11 +82,17 @@ export default function BookDetails({ book, open, onClose, onDelete, onEdit }: B
               </Typography>
             </Box>
             <Button
-              onClick={() => setIsEditModalOpen(true)}
-              startIcon={<EditIcon />}
-              sx={{ fontFamily: 'var(--font-eb-garamond)' }}
+              onClick={onClose}
+              sx={{
+                fontFamily: 'var(--font-eb-garamond)',
+                minWidth: 'auto',
+                p: 1,
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                },
+              }}
             >
-              Edit
+              ✕
             </Button>
           </Box>
         </DialogTitle>
@@ -178,12 +184,16 @@ export default function BookDetails({ book, open, onClose, onDelete, onEdit }: B
             color="error"
             startIcon={<DeleteIcon />}
             disabled={isDeleting}
-            sx={{ fontFamily: 'var(--font-eb-garamond)' }}
+            sx={{ fontFamily: 'var(--font-eb-garamond)', mr: 'auto' }}
           >
             {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
-          <Button onClick={onClose} sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
-            Close
+          <Button
+            onClick={() => setIsEditModalOpen(true)}
+            startIcon={<EditIcon />}
+            sx={{ fontFamily: 'var(--font-eb-garamond)' }}
+          >
+            Edit
           </Button>
         </DialogActions>
       </Dialog>

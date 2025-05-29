@@ -1,4 +1,8 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Rating, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Rating, Typography, Slider } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 import { useState } from 'react';
 import { Book } from '@/types/book';
 
@@ -18,9 +22,13 @@ export default function EditBookModal({ book, open, onClose, onSuccess }: EditBo
     review: book.review || '',
     completed: book.completed,
     publisher: book.publisher || '',
-    publication_date: book.publication_date || '',
+    publication_date: book.publication_date ? dayjs(book.publication_date) : null,
     summary: book.summary || '',
-    tags: book.tags.join(', '),
+    tags: (book.tags || []).join(', '),
+    isbn_13: book.isbn_13,
+    isbn_10: book.isbn_10 || '',
+    genre: book.genre || '',
+    sub_genre: book.sub_genre || '',
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +47,7 @@ export default function EditBookModal({ book, open, onClose, onSuccess }: EditBo
         },
         body: JSON.stringify({
           ...formData,
+          publication_date: formData.publication_date ? formData.publication_date.format('YYYY-MM-DD') : null,
           tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
         }),
       });
@@ -71,31 +80,70 @@ export default function EditBookModal({ book, open, onClose, onSuccess }: EditBo
         <DialogTitle sx={{ fontFamily: 'var(--font-eb-garamond)' }}>Edit Book</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            <TextField
-              name="title"
-              label="Title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              fullWidth
-            />
-            <TextField
-              name="author"
-              label="Author"
-              value={formData.author}
-              onChange={handleChange}
-              required
-              fullWidth
-            />
-            <TextField
-              name="pages"
-              label="Pages"
-              type="number"
-              value={formData.pages}
-              onChange={handleChange}
-              required
-              fullWidth
-            />
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <TextField
+                name="title"
+                label="Title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                fullWidth
+              />
+              <TextField
+                name="author"
+                label="Author"
+                value={formData.author}
+                onChange={handleChange}
+                required
+                fullWidth
+              />
+              <TextField
+                name="isbn_13"
+                label="ISBN-13"
+                value={formData.isbn_13}
+                onChange={handleChange}
+                required
+                fullWidth
+              />
+              <TextField
+                name="isbn_10"
+                label="ISBN-10"
+                value={formData.isbn_10}
+                onChange={handleChange}
+                fullWidth
+              />
+              <TextField
+                name="publisher"
+                label="Publisher"
+                value={formData.publisher}
+                onChange={handleChange}
+                fullWidth
+              />
+              <TextField
+                name="pages"
+                label="Pages"
+                type="number"
+                value={formData.pages}
+                onChange={handleChange}
+                required
+                fullWidth
+              />
+              <TextField
+                name="genre"
+                label="Genre"
+                value={formData.genre}
+                onChange={handleChange}
+                fullWidth
+              />
+              <TextField
+                name="sub_genre"
+                label="Sub-genre"
+                value={formData.sub_genre}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Box>
+
             <Box>
               <Typography component="legend">Rating</Typography>
               <Rating
@@ -106,6 +154,41 @@ export default function EditBookModal({ book, open, onClose, onSuccess }: EditBo
                 }}
               />
             </Box>
+
+            <Box>
+              <Typography component="legend">Completion</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                <Slider
+                  value={formData.completed}
+                  onChange={(_, value) => {
+                    setFormData(prev => ({ ...prev, completed: value as number }));
+                  }}
+                  min={0}
+                  max={100}
+                  step={1}
+                  sx={{ flex: 1 }}
+                />
+                <Typography sx={{ minWidth: 45 }}>
+                  {formData.completed}%
+                </Typography>
+              </Box>
+            </Box>
+
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Publication Date"
+                value={formData.publication_date}
+                onChange={(newValue) => {
+                  setFormData(prev => ({ ...prev, publication_date: newValue }));
+                }}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+
             <TextField
               name="review"
               label="Review"
@@ -115,30 +198,7 @@ export default function EditBookModal({ book, open, onClose, onSuccess }: EditBo
               rows={4}
               fullWidth
             />
-            <TextField
-              name="completed"
-              label="Completion (%)"
-              type="number"
-              value={formData.completed}
-              onChange={handleChange}
-              inputProps={{ min: 0, max: 100 }}
-              required
-              fullWidth
-            />
-            <TextField
-              name="publisher"
-              label="Publisher"
-              value={formData.publisher}
-              onChange={handleChange}
-              fullWidth
-            />
-            <TextField
-              name="publication_date"
-              label="Publication Date"
-              value={formData.publication_date}
-              onChange={handleChange}
-              fullWidth
-            />
+
             <TextField
               name="summary"
               label="Summary"
@@ -148,6 +208,7 @@ export default function EditBookModal({ book, open, onClose, onSuccess }: EditBo
               rows={4}
               fullWidth
             />
+
             <TextField
               name="tags"
               label="Tags (comma-separated)"
@@ -155,6 +216,7 @@ export default function EditBookModal({ book, open, onClose, onSuccess }: EditBo
               onChange={handleChange}
               fullWidth
             />
+
             {error && (
               <Typography color="error" sx={{ mt: 2 }}>
                 {error}
