@@ -1,13 +1,13 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import { IconButton, Tooltip } from '@mui/material';
+import { useEffect, useState, Suspense } from 'react';
+import { IconButton, Tooltip, Container, Typography } from '@mui/material';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ThemeToggle() {
+function ThemeToggleContent() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
@@ -62,5 +62,17 @@ export default function ThemeToggle() {
         )}
       </IconButton>
     </Tooltip>
+  );
+}
+
+export default function ThemeToggle() {
+  return (
+    <Suspense fallback={
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography>Loading theme...</Typography>
+      </Container>
+    }>
+      <ThemeToggleContent />
+    </Suspense>
   );
 }

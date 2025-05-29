@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { TextField, InputAdornment, IconButton, Box, Button, CircularProgress } from '@mui/material';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { TextField, InputAdornment, IconButton, Box, Button, CircularProgress, Container, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useRouter, useSearchParams } from 'next/navigation';
 import debounce from 'lodash/debounce';
 
-export default function SearchWrapper() {
+function SearchContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -120,5 +120,17 @@ export default function SearchWrapper() {
         }}
       />
     </Box>
+  );
+}
+
+export default function SearchWrapper() {
+  return (
+    <Suspense fallback={
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography>Loading search...</Typography>
+      </Container>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }
