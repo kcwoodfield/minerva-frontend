@@ -17,6 +17,7 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --ring: #d1d5db;
+  --font-eb-garamond: 'EB Garamond', serif;
 }
 
 .dark {
@@ -45,6 +46,9 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
     background-color: var(--background);
+    font-family: var(--font-eb-garamond);
+    margin: 0;
+    padding: 0;
   }
 }
 

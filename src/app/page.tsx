@@ -1,286 +1,277 @@
 'use client';
 
-import { useEffect, useState, Suspense, useCallback } from 'react';
-import { Container, Typography, IconButton, Snackbar, Alert, Box } from '@mui/material';
-import { useRouter, useSearchParams } from 'next/navigation';
-import AddIcon from '@mui/icons-material/Add';
-import dynamic from 'next/dynamic';
-import BookDetails from '@/components/BookDetails';
-import AddBookModal from '@/components/AddBookModal';
-import TableControls from '@/components/TableControls';
+import { useState, useEffect } from 'react';
+import {
+  Container,
+  Text,
+  IconButton,
+  useToast,
+  Box,
+  useColorModeValue,
+} from '@chakra-ui/react';
+import { AddIcon } from '@chakra-ui/icons';
 import BookTable from '@/components/BookTable';
-import PaginationControls from '@/components/PaginationControls';
+import AddBookModal from '@/components/AddBookModal';
+import BookDetails from '@/components/BookDetails';
+import EditBookModal from '@/components/EditBookModal';
+import SearchWrapper from '@/components/SearchWrapper';
+import TableControls from '@/components/TableControls';
 import { Book } from '@/types/book';
-import { SelectChangeEvent } from '@mui/material/Select';
 
-// Dynamically import SearchWrapper with SSR disabled and loading state
-const SearchWrapper = dynamic(() => import('@/components/SearchWrapper'), {
-  ssr: false,
-  loading: () => <div>Loading search...</div>
-});
+type SortColumn = 'title' | 'author' | 'pages' | 'rating' | 'completed' | 'date_added';
 
-function PageContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const initialPage = parseInt(searchParams.get('page') || '1', 10);
-  const initialLimit = parseInt(searchParams.get('limit') || '25', 10);
-  const initialSort = searchParams.get('sort') || 'title';
-  const initialOrder = searchParams.get('order') || 'asc';
-  const initialCompleted = searchParams.get('completed') || 'all';
-  const initialQuery = searchParams.get('q') || '';
-
+export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(initialPage);
-  const [limit, setLimit] = useState(initialLimit);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
-  const [filteredTotal, setFilteredTotal] = useState(0);
-  const [sort, setSort] = useState(initialSort);
-  const [order, setOrder] = useState<'asc' | 'desc'>(initialOrder as 'asc' | 'desc');
-  const [completed, setCompleted] = useState(initialCompleted);
-  const [query, setQuery] = useState(initialQuery);
-
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [addSuccess, setAddSuccess] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [sort, setSort] = useState<SortColumn>('date_added');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchQuery, setSearchQuery] = useState('');
+  const toast = useToast();
+  const bgColor = useColorModeValue('white', 'gray.800');
 
   useEffect(() => {
-    setPage(initialPage);
-    setLimit(initialLimit);
-    setSort(initialSort);
-    setOrder(initialOrder as 'asc' | 'desc');
-    setCompleted(initialCompleted);
-    setQuery(initialQuery);
-  }, [initialPage, initialLimit, initialSort, initialOrder, initialCompleted, initialQuery]);
+    fetchBooks();
+  }, []);
 
-  const fetchBooks = useCallback(async () => {
-    setLoading(true);
+  const fetchBooks = async () => {
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        sort,
-        order,
-        completed,
-      });
-      if (query) {
-        params.set('q', query);
-      }
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${params.toString()}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`);
       if (!response.ok) {
-        throw new Error("Failed to fetch books");
+        throw new Error('Failed to fetch books');
       }
       const data = await response.json();
-      setBooks(data.items);
-      setTotalPages(data.pages);
-      setFilteredTotal(data.total);
-
-      // Fetch total books without filters
-      const totalParams = new URLSearchParams();
-      if (query) {
-        totalParams.set('q', query);
-      }
-      const totalResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/library"}?${totalParams.toString()}&limit=1`);
-      if (totalResponse.ok) {
-        const totalData = await totalResponse.json();
-        setTotalItems(totalData.total);
-      }
+      setBooks(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      toast({
+        title: 'Error fetching books',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      setBooks([]);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [page, limit, sort, order, completed, query]);
-
-  useEffect(() => {
-    fetchBooks();
-  }, [fetchBooks]);
-
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', newPage.toString());
-    params.set('limit', limit.toString());
-    params.set('sort', sort);
-    params.set('order', order);
-    params.set('completed', completed);
-    if (query) {
-      params.set('q', query);
-    }
-    router.push(`/?${params.toString()}`);
   };
 
-  const handleSort = (column: string) => {
-    let newOrder = 'asc';
+  const handleAddBook = async (book: { title: string; author: string; pages: number; rating: number; completed: number; }) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(book),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add book');
+      }
+
+      const newBook = await response.json();
+      setBooks(prev => [...prev, newBook]);
+      toast({
+        title: 'Book added',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        title: 'Error adding book',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleEditBook = async (book: Book) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${book.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(book),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update book');
+      }
+
+      const updatedBook = await response.json();
+      setBooks(prev => prev.map(b => b.id === updatedBook.id ? updatedBook : b));
+      toast({
+        title: 'Book updated',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        title: 'Error updating book',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleDeleteBook = async (bookId: number) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${bookId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete book');
+      }
+
+      setBooks(prev => prev.filter(b => b.id !== bookId));
+      toast({
+        title: 'Book deleted',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      toast({
+        title: 'Error deleting book',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      throw err;
+    }
+  };
+
+  const handleSort = (column: SortColumn) => {
     if (sort === column) {
-      newOrder = order === 'asc' ? 'desc' : 'asc';
+      setOrder(order === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSort(column);
+      setOrder('asc');
     }
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('sort', column);
-    params.set('order', newOrder);
-    params.set('page', '1');
-    if (query) {
-      params.set('q', query);
-    }
-    params.set('completed', completed);
-    router.push(`/?${params.toString()}`);
   };
 
-  const handleCompletedChange = (event: SelectChangeEvent) => {
-    const newCompleted = event.target.value;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('completed', newCompleted);
-    params.set('page', '1');
-    params.set('sort', sort);
-    params.set('order', order);
-    if (query) {
-      params.set('q', query);
-    }
-    router.push(`/?${params.toString()}`);
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
   };
 
-  const handleClear = () => {
-    router.push('/');
-  };
+  const filteredBooks = books
+    .filter(book => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        book.title.toLowerCase().includes(searchLower) ||
+        book.author.toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => {
+      const modifier = order === 'asc' ? 1 : -1;
 
-  const handleBookClick = (book: Book) => {
-    setSelectedBook(book);
-  };
-
-  const handleBookDelete = () => {
-    setSelectedBook(null);
-    setDeleteSuccess(true);
-    fetchBooks();
-  };
-
-  if (loading) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography>Loading...</Typography>
-      </Container>
-    );
-  }
+      switch (sort) {
+        case 'date_added':
+          return (new Date(a.date_added).getTime() - new Date(b.date_added).getTime()) * modifier;
+        case 'title':
+        case 'author':
+          return (a[sort] as string).localeCompare(b[sort] as string) * modifier;
+        case 'pages':
+        case 'rating':
+        case 'completed':
+          return ((a[sort] as number) - (b[sort] as number)) * modifier;
+        default:
+          return 0;
+      }
+    });
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography color="error">{error}</Typography>
+      <Container maxW="container.xl" py={8}>
+        <Text color="red.500">{error}</Text>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth={false} sx={{ py: 4, maxWidth: '1400px' }}>
-      <IconButton
-        size="small"
-        onClick={() => setIsAddModalOpen(true)}
-        sx={{
-          position: 'fixed',
-          left: 16,
-          top: 16,
-          zIndex: 1000,
-          backgroundColor: 'background.paper',
-          boxShadow: 1,
-          '&:hover': {
-            backgroundColor: 'action.hover',
-          },
-          fontSize: '1.25rem'
-        }}
+    <Container maxW="container.xl" py={8}>
+      <Box
+        position="fixed"
+        bottom={8}
+        right={8}
+        zIndex={1000}
       >
-        <AddIcon />
-      </IconButton>
-
-      <AddBookModal
-        open={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSuccess={() => {
-          setIsAddModalOpen(false);
-          setAddSuccess(true);
-          fetchBooks();
-        }}
-      />
-
-      <Box sx={{ mb: 4 }}>
-        <SearchWrapper />
+        <IconButton
+          aria-label="Add book"
+          icon={<AddIcon />}
+          onClick={() => setIsAddModalOpen(true)}
+          colorScheme="blue"
+          size="lg"
+          isRound
+        />
       </Box>
 
+      <SearchWrapper onSearch={handleSearch} isLoading={isLoading} />
+
       <TableControls
-        limit={limit}
-        totalItems={totalItems}
-        filteredTotal={filteredTotal}
-        completed={completed}
-        onLimitChange={(newLimit) => {
-          const params = new URLSearchParams(searchParams.toString());
-          params.set('limit', newLimit.toString());
-          params.set('page', '1');
-          router.push(`/?${params.toString()}`);
+        totalBooks={filteredBooks.length}
+        onClearFilters={() => {
+          setSearchQuery('');
+          setSort('date_added');
+          setOrder('desc');
         }}
-        onCompletedChange={handleCompletedChange}
-        onClear={handleClear}
+        sort={sort}
+        order={order}
+        onSortChange={(e) => setSort(e.target.value as SortColumn)}
+        onOrderChange={(e) => setOrder(e.target.value as 'asc' | 'desc')}
+        hasFilters={searchQuery !== '' || sort !== 'date_added' || order !== 'desc'}
       />
 
       <BookTable
-        books={books}
+        books={filteredBooks}
         sort={sort}
         order={order}
         onSort={handleSort}
-        onBookClick={handleBookClick}
+        onBookClick={setSelectedBook}
       />
 
-      <PaginationControls
-        page={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
+      <AddBookModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAddBook}
       />
 
-      <BookDetails
-        book={selectedBook}
-        open={!!selectedBook}
-        onClose={() => setSelectedBook(null)}
-        onDelete={handleBookDelete}
-        onEdit={() => {
-          fetchBooks();
-        }}
-      />
+      {selectedBook && (
+        <BookDetails
+          book={selectedBook}
+          isOpen={!!selectedBook}
+          onClose={() => setSelectedBook(null)}
+          onEdit={(book) => {
+            setSelectedBook(book);
+            setIsEditModalOpen(true);
+          }}
+          onDelete={handleDeleteBook}
+        />
+      )}
 
-      <Snackbar
-        open={deleteSuccess}
-        autoHideDuration={3000}
-        onClose={() => setDeleteSuccess(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={() => setDeleteSuccess(false)} severity="success" sx={{ width: '100%' }}>
-          Book deleted successfully
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={addSuccess}
-        autoHideDuration={3000}
-        onClose={() => setAddSuccess(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        sx={{ zIndex: 9999 }}
-      >
-        <Alert onClose={() => setAddSuccess(false)} severity="success" sx={{ width: '100%' }}>
-          Book added successfully
-        </Alert>
-      </Snackbar>
+      {selectedBook && (
+        <EditBookModal
+          book={selectedBook}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleEditBook}
+        />
+      )}
     </Container>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography>Loading...</Typography>
-      </Container>
-    }>
-      <PageContent />
-    </Suspense>
   );
 }
 

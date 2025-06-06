@@ -1,243 +1,167 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Rating, Typography, Slider } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 import { useState } from 'react';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
+  useColorModeValue,
+  useToast,
+} from '@chakra-ui/react';
 import { Book } from '@/types/book';
 
 interface EditBookModalProps {
   book: Book;
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSave: (book: Book) => void;
 }
 
-export default function EditBookModal({ book, open, onClose, onSuccess }: EditBookModalProps) {
-  const [formData, setFormData] = useState({
-    title: book.title,
-    author: book.author,
-    pages: book.pages,
-    rating: book.rating,
-    review: book.review || '',
-    completed: book.completed,
-    publisher: book.publisher || '',
-    publication_date: book.publication_date ? dayjs(book.publication_date) : null,
-    summary: book.summary || '',
-    tags: (book.tags || []).join(', '),
-    isbn_13: book.isbn_13,
-    isbn_10: book.isbn_10 || '',
-    genre: book.genre || '',
-    sub_genre: book.sub_genre || '',
-  });
-
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function EditBookModal({ book, isOpen, onClose, onSave }: EditBookModalProps) {
+  const [title, setTitle] = useState(book.title);
+  const [author, setAuthor] = useState(book.author);
+  const [pages, setPages] = useState(book.pages);
+  const [rating, setRating] = useState(book.rating);
+  const [completed, setCompleted] = useState(book.completed);
+  const [isSaving, setIsSaving] = useState(false);
+  const toast = useToast();
+  const bgColor = useColorModeValue('white', 'gray.800');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+    setIsSaving(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${book.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          publication_date: formData.publication_date ? formData.publication_date.format('YYYY-MM-DD') : null,
-          tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-        }),
+      const updatedBook = {
+        ...book,
+        title,
+        author,
+        pages,
+        rating,
+        completed,
+      };
+      await onSave(updatedBook);
+      toast({
+        title: 'Book updated',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Failed to update book');
-      }
-
-      onSuccess();
       onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (error) {
+      toast({
+        title: 'Error updating book',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontFamily: 'var(--font-eb-garamond)' }}>Edit Book</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-              <TextField
-                name="title"
-                label="Title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-                fullWidth
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent bg={bgColor}>
+        <ModalHeader>Edit Book</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <form onSubmit={handleSubmit} id="edit-book-form">
+            <FormControl isRequired mb={4}>
+              <FormLabel>Title</FormLabel>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter book title"
               />
-              <TextField
-                name="author"
-                label="Author"
-                value={formData.author}
-                onChange={handleChange}
-                required
-                fullWidth
-              />
-              <TextField
-                name="isbn_13"
-                label="ISBN-13"
-                value={formData.isbn_13}
-                onChange={handleChange}
-                required
-                fullWidth
-              />
-              <TextField
-                name="isbn_10"
-                label="ISBN-10"
-                value={formData.isbn_10}
-                onChange={handleChange}
-                fullWidth
-              />
-              <TextField
-                name="publisher"
-                label="Publisher"
-                value={formData.publisher}
-                onChange={handleChange}
-                fullWidth
-              />
-              <TextField
-                name="pages"
-                label="Pages"
-                type="number"
-                value={formData.pages}
-                onChange={handleChange}
-                required
-                fullWidth
-              />
-              <TextField
-                name="genre"
-                label="Genre"
-                value={formData.genre}
-                onChange={handleChange}
-                fullWidth
-              />
-              <TextField
-                name="sub_genre"
-                label="Sub-genre"
-                value={formData.sub_genre}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Box>
+            </FormControl>
 
-            <Box>
-              <Typography component="legend">Rating</Typography>
-              <Rating
-                name="rating"
-                value={formData.rating}
-                onChange={(_, value) => {
-                  setFormData(prev => ({ ...prev, rating: value || 0 }));
-                }}
+            <FormControl isRequired mb={4}>
+              <FormLabel>Author</FormLabel>
+              <Input
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Enter author name"
               />
-            </Box>
+            </FormControl>
 
-            <Box>
-              <Typography component="legend">Completion</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                <Slider
-                  value={formData.completed}
-                  onChange={(_, value) => {
-                    setFormData(prev => ({ ...prev, completed: value as number }));
-                  }}
-                  min={0}
-                  max={100}
-                  step={1}
-                  sx={{ flex: 1 }}
-                />
-                <Typography sx={{ minWidth: 45 }}>
-                  {formData.completed}%
-                </Typography>
-              </Box>
-            </Box>
+            <FormControl mb={4}>
+              <FormLabel>Pages</FormLabel>
+              <NumberInput
+                value={pages}
+                onChange={(_, value) => setPages(value)}
+                min={0}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Publication Date"
-                value={formData.publication_date}
-                onChange={(newValue) => {
-                  setFormData(prev => ({ ...prev, publication_date: newValue }));
-                }}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </LocalizationProvider>
+            <FormControl mb={4}>
+              <FormLabel>Rating (0-5)</FormLabel>
+              <NumberInput
+                value={rating}
+                onChange={(_, value) => setRating(value)}
+                min={0}
+                max={5}
+                step={0.5}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
 
-            <TextField
-              name="review"
-              label="Review"
-              value={formData.review}
-              onChange={handleChange}
-              multiline
-              rows={4}
-              fullWidth
-            />
+            <FormControl mb={4}>
+              <FormLabel>Progress (0-100%)</FormLabel>
+              <NumberInput
+                value={completed}
+                onChange={(_, value) => setCompleted(value)}
+                min={0}
+                max={100}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
+          </form>
+        </ModalBody>
 
-            <TextField
-              name="summary"
-              label="Summary"
-              value={formData.summary}
-              onChange={handleChange}
-              multiline
-              rows={4}
-              fullWidth
-            />
-
-            <TextField
-              name="tags"
-              label="Tags (comma-separated)"
-              value={formData.tags}
-              onChange={handleChange}
-              fullWidth
-            />
-
-            {error && (
-              <Typography color="error" sx={{ mt: 2 }}>
-                {error}
-              </Typography>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose} sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
+        <ModalFooter>
+          <Button variant="ghost" mr={3} onClick={onClose}>
             Cancel
           </Button>
           <Button
             type="submit"
-            variant="contained"
-            disabled={isSubmitting}
-            sx={{ fontFamily: 'var(--font-eb-garamond)' }}
+            form="edit-book-form"
+            colorScheme="blue"
+            isLoading={isSaving}
           >
-            {isSubmitting ? 'Saving...' : 'Save Changes'}
+            Save Changes
           </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }

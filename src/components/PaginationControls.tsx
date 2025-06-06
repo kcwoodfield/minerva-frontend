@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Text, useColorModeValue } from '@chakra-ui/react';
 
 interface PaginationControlsProps {
   page: number;
@@ -7,45 +7,51 @@ interface PaginationControlsProps {
 }
 
 export default function PaginationControls({ page, totalPages, onPageChange }: PaginationControlsProps) {
+  const buttonBg = useColorModeValue('blue.500', 'blue.200');
+  const buttonColor = useColorModeValue('white', 'gray.800');
+  const buttonHoverBg = useColorModeValue('blue.600', 'blue.300');
+
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+    <Box display="flex" justifyContent="center" mt={4}>
       <Button
-        disabled={page === 1}
+        isDisabled={page === 1}
         onClick={() => onPageChange(page - 1)}
-        variant="contained"
-        size="small"
-        sx={{
-          fontFamily: 'var(--font-eb-garamond)',
-          fontSize: '0.875rem',
-          px: 1.5,
-          py: 0.5,
-          minWidth: '80px',
-          textTransform: 'none'
+        size="sm"
+        bg={buttonBg}
+        color={buttonColor}
+        _hover={{
+          bg: buttonHoverBg
         }}
+        px={6}
+        py={2}
+        minW="80px"
+        fontFamily="var(--font-eb-garamond)"
+        fontSize="0.875rem"
       >
         Previous
       </Button>
-      <Typography sx={{
-        mx: 2,
-        fontFamily: 'var(--font-eb-garamond)',
-        pt: 1,
-        fontSize: '1rem'
-      }}>
+      <Text
+        mx={4}
+        fontFamily="var(--font-eb-garamond)"
+        pt={1}
+        fontSize="1rem"
+      >
         Page {page} of {totalPages}
-      </Typography>
+      </Text>
       <Button
-        disabled={page === totalPages}
+        isDisabled={page === totalPages}
         onClick={() => onPageChange(page + 1)}
-        variant="contained"
-        size="small"
-        sx={{
-          fontFamily: 'var(--font-eb-garamond)',
-          fontSize: '0.875rem',
-          px: 1.5,
-          py: 0.5,
-          minWidth: '80px',
-          textTransform: 'none'
+        size="sm"
+        bg={buttonBg}
+        color={buttonColor}
+        _hover={{
+          bg: buttonHoverBg
         }}
+        px={6}
+        py={2}
+        minW="80px"
+        fontFamily="var(--font-eb-garamond)"
+        fontSize="0.875rem"
       >
         Next
       </Button>

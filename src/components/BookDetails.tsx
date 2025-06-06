@@ -1,230 +1,119 @@
 'use client';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Grid, Rating, Alert, Snackbar, LinearProgress } from '@mui/material';
+import { useState } from 'react';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  Text,
+  Box,
+  Grid,
+  GridItem,
+  IconButton,
+  useColorModeValue,
+  useToast,
+} from '@chakra-ui/react';
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import { Book } from '@/types/book';
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import EditBookModal from './EditBookModal';
 import Image from 'next/image';
 
 interface BookDetailsProps {
-  book: Book | null;
-  open: boolean;
+  book: Book;
+  isOpen: boolean;
   onClose: () => void;
-  onDelete?: () => void;
-  onEdit?: () => void;
+  onEdit: (book: Book) => void;
+  onDelete: (bookId: number) => void;
 }
 
-export default function BookDetails({ book, open, onClose, onDelete, onEdit }: BookDetailsProps) {
-  const [mounted, setMounted] = useState(false);
+export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }: BookDetailsProps) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const toast = useToast();
+  const bgColor = useColorModeValue('white', 'gray.800');
 
   const handleDelete = async () => {
-    if (!book || !window.confirm('Are you sure you want to delete this book?')) {
-      return;
-    }
-
     setIsDeleting(true);
-    setError(null);
-
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${book.id}`, {
-        method: 'DELETE',
+      await onDelete(Number(book.id));
+      toast({
+        title: 'Book deleted',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Failed to delete book');
-      }
-
       onClose();
-      if (onDelete) {
-        onDelete();
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (error) {
+      toast({
+        title: 'Error deleting book',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     } finally {
       setIsDeleting(false);
     }
   };
 
-  if (!book || !mounted) return null;
-
   return (
-    <>
-      <Dialog
-        open={open}
-        onClose={onClose}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            bgcolor: resolvedTheme === 'dark' ? 'background.paper' : 'background.paper',
-          }
-        }}
-      >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Box>
-              <Typography variant="h5" component="div" sx={{ fontFamily: 'var(--font-eb-garamond)' }}>
-                {book.title}
-              </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                by {book.author}
-              </Typography>
-            </Box>
-            <Button
-              onClick={onClose}
-              sx={{
-                fontFamily: 'var(--font-eb-garamond)',
-                minWidth: 'auto',
-                p: 1,
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              ✕
-            </Button>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            {book.cover_image_url && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                <Image
-                  src={book.cover_image_url}
-                  alt={`Cover of ${book.title}`}
-                  width={200}
-                  height={300}
-                  style={{ maxWidth: '200px', maxHeight: '300px', objectFit: 'contain' }}
-                />
-              </Box>
-            )}
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">ISBN-13</Typography>
-              <Typography>{book.isbn_13}</Typography>
-            </Box>
-            {book.isbn_10 && (
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">ISBN-10</Typography>
-                <Typography>{book.isbn_10}</Typography>
-              </Box>
-            )}
-            {book.publisher && (
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">Publisher</Typography>
-                <Typography>{book.publisher}</Typography>
-              </Box>
-            )}
-            {book.publication_date && (
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">Publication Date</Typography>
-                <Typography>{book.publication_date}</Typography>
-              </Box>
-            )}
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">Pages</Typography>
-              <Typography>{book.pages}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">Rating</Typography>
-              <Typography>{book.rating}/5</Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">Completion</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box sx={{ width: '100%', mr: 1 }}>
-                  <LinearProgress variant="determinate" value={book.completed} />
-                </Box>
-                <Box sx={{ minWidth: 35 }}>
-                  <Typography variant="body2" color="text.secondary">{`${book.completed}%`}</Typography>
-                </Box>
-              </Box>
-            </Box>
-            {book.summary && (
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">Summary</Typography>
-                <Typography>{book.summary}</Typography>
-              </Box>
-            )}
-            {book.tags && book.tags.length > 0 && (
-              <Box>
-                <Typography variant="subtitle2" color="text.secondary">Tags</Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {book.tags.map((tag) => (
-                    <Typography
-                      key={tag}
-                      variant="body2"
-                      sx={{
-                        backgroundColor: 'primary.main',
-                        color: 'primary.contrastText',
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                      }}
-                    >
-                      {tag}
-                    </Typography>
-                  ))}
-                </Box>
-              </Box>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
+    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <ModalOverlay />
+      <ModalContent bg={bgColor}>
+        <ModalHeader>{book.title}</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+            <GridItem>
+              <Text fontWeight="bold">Author</Text>
+              <Text>{book.author}</Text>
+            </GridItem>
+            <GridItem>
+              <Text fontWeight="bold">Pages</Text>
+              <Text>{book.pages}</Text>
+            </GridItem>
+            <GridItem>
+              <Text fontWeight="bold">Rating</Text>
+              <Text>{book.rating}/5</Text>
+            </GridItem>
+            <GridItem>
+              <Text fontWeight="bold">Progress</Text>
+              <Text>
+                {book.completed === 0 ? 'Not Started' :
+                 book.completed === 100 ? 'Completed' :
+                 `In Progress (${book.completed}%)`}
+              </Text>
+            </GridItem>
+            <GridItem>
+              <Text fontWeight="bold">Date Added</Text>
+              <Text>{new Date(book.date_added).toLocaleDateString()}</Text>
+            </GridItem>
+          </Grid>
+        </ModalBody>
+
+        <ModalFooter>
+          <IconButton
+            aria-label="Edit book"
+            icon={<EditIcon />}
+            onClick={() => onEdit(book)}
+            mr={3}
+            variant="ghost"
+          />
+          <IconButton
+            aria-label="Delete book"
+            icon={<DeleteIcon />}
             onClick={handleDelete}
-            color="error"
-            startIcon={<DeleteIcon />}
-            disabled={isDeleting}
-            sx={{ fontFamily: 'var(--font-eb-garamond)', mr: 'auto' }}
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </Button>
-          <Button
-            onClick={() => setIsEditModalOpen(true)}
-            startIcon={<EditIcon />}
-            sx={{ fontFamily: 'var(--font-eb-garamond)' }}
-          >
-            Edit
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {book && (
-        <EditBookModal
-          book={book}
-          open={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSuccess={() => {
-            setIsEditModalOpen(false);
-            if (onEdit) {
-              onEdit();
-            }
-          }}
-        />
-      )}
-
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="error" onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      </Snackbar>
-    </>
+            isLoading={isDeleting}
+            colorScheme="red"
+            variant="ghost"
+            mr={3}
+          />
+          <Button onClick={onClose}>Close</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }

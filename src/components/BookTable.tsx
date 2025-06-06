@@ -1,16 +1,27 @@
-import { TableContainer, Paper, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Box,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { Book } from '@/types/book';
+
+type SortColumn = 'title' | 'author' | 'pages' | 'rating' | 'completed' | 'date_added';
 
 interface BookTableProps {
   books: Book[];
-  sort: string;
+  sort: SortColumn;
   order: 'asc' | 'desc';
-  onSort: (column: string) => void;
+  onSort: (column: SortColumn) => void;
   onBookClick: (book: Book) => void;
 }
 
 export default function BookTable({ books, sort, order, onSort, onBookClick }: BookTableProps) {
-  const columns = [
+  const columns: { key: SortColumn; label: string; width: string }[] = [
     { key: 'title', label: 'Title', width: '300px' },
     { key: 'author', label: 'Author', width: '200px' },
     { key: 'pages', label: 'Length (Pages)', width: '120px' },
@@ -19,86 +30,82 @@ export default function BookTable({ books, sort, order, onSort, onBookClick }: B
     { key: 'date_added', label: 'Date Added', width: '120px' },
   ];
 
+  const hoverBg = useColorModeValue('gray.50', 'gray.700');
+  const bgColor = useColorModeValue('white', 'gray.800');
+
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        bgcolor: 'background.default',
-        '& .MuiPaper-root': {
-          bgcolor: (theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : 'background.default',
-        },
-        pb: 2
-      }}
+    <Box
+      bg={bgColor}
+      borderRadius="md"
+      boxShadow="sm"
+      overflow="hidden"
+      pb={4}
     >
       <Table>
-        <TableHead>
-          <TableRow>
+        <Thead>
+          <Tr>
             {columns.map(col => (
-              <TableCell
+              <Th
                 key={col.key}
                 onClick={() => onSort(col.key)}
-                sx={{
-                  cursor: 'pointer',
-                  fontWeight: sort === col.key ? '700' : '600',
-                  fontSize: '1rem',
-                  padding: '12px 16px',
-                  letterSpacing: '0.025em',
-                  borderBottom: 'none',
-                  width: col.width,
-                  minWidth: col.width,
-                  maxWidth: col.width
-                }}
+                cursor="pointer"
+                fontWeight={sort === col.key ? '700' : '600'}
+                fontSize="1rem"
+                py={3}
+                px={4}
+                letterSpacing="0.025em"
+                borderBottom="none"
+                width={col.width}
+                minWidth={col.width}
+                maxWidth={col.width}
               >
                 {col.label}
                 {sort === col.key && (
-                  <span style={{ marginLeft: 4 }}>{order === 'asc' ? '↑' : '↓'}</span>
+                  <Box as="span" ml={1}>{order === 'asc' ? '↑' : '↓'}</Box>
                 )}
-              </TableCell>
+              </Th>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
+          </Tr>
+        </Thead>
+        <Tbody>
           {books.map(book => (
-            <TableRow
+            <Tr
               key={book.id}
               onClick={() => onBookClick(book)}
-              sx={{
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2a2a2a' : '#f2f2f6',
-                  transition: 'background-color 0.2s ease'
-                }
+              cursor="pointer"
+              _hover={{
+                bg: hoverBg,
+                transition: 'background-color 0.2s ease'
               }}
             >
-              <TableCell
-                className="font-medium"
-                sx={{
-                  borderBottom: 'none',
-                  maxWidth: '300px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontSize: '1rem',
-                  padding: '12px 16px'
-                }}
+              <Td
+                fontWeight="medium"
+                borderBottom="none"
+                maxWidth="300px"
+                whiteSpace="nowrap"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                fontSize="1rem"
+                py={3}
+                px={4}
               >
                 {book.title}
-              </TableCell>
-              <TableCell sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.author}</TableCell>
-              <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.pages}</TableCell>
-              <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>{book.rating}</TableCell>
-              <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>
+              </Td>
+              <Td borderBottom="none" fontSize="1rem" py={3} px={4}>{book.author}</Td>
+              <Td display={{ base: 'none', md: 'table-cell' }} borderBottom="none" fontSize="1rem" py={3} px={4}>{book.pages}</Td>
+              <Td display={{ base: 'none', md: 'table-cell' }} borderBottom="none" fontSize="1rem" py={3} px={4}>{book.rating}</Td>
+              <Td display={{ base: 'none', md: 'table-cell' }} borderBottom="none" fontSize="1rem" py={3} px={4}>
                 {book.completed === 0 ? 'Not Started' :
                  book.completed === 100 ? 'Completed' :
                  `In Progress (${book.completed}%)`}
-              </TableCell>
-              <TableCell className="hidden md:table-cell" sx={{ borderBottom: 'none', fontSize: '1rem', padding: '12px 16px' }}>
+              </Td>
+              <Td display={{ base: 'none', md: 'table-cell' }} borderBottom="none" fontSize="1rem" py={3} px={4}>
                 {new Date(book.date_added).toLocaleDateString()}
-              </TableCell>
-            </TableRow>
+              </Td>
+            </Tr>
           ))}
-        </TableBody>
+        </Tbody>
       </Table>
-    </TableContainer>
+    </Box>
   );
 }

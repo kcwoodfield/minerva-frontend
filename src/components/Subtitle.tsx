@@ -1,6 +1,6 @@
 'use client';
 
-import { Typography } from '@mui/material';
+import { Text, useColorModeValue } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 
 const subtitles = [
@@ -12,6 +12,8 @@ const subtitles = [
 
 export default function Subtitle() {
   const [subtitle, setSubtitle] = useState('');
+  const mutedColor = useColorModeValue('gray.600', 'gray.400');
+  const hoverColor = useColorModeValue('gray.800', 'gray.200');
 
   const getRandomSubtitle = () => {
     const randomIndex = Math.floor(Math.random() * subtitles.length);
@@ -31,25 +33,21 @@ export default function Subtitle() {
   };
 
   return (
-    <Typography
-      variant="subtitle2"
-      component="div"
-      onClick={handleClick}
-      sx={{
-        color: 'var(--muted-foreground)',
-        fontSize: '1rem',
-        letterSpacing: '0.025em',
-        mt: -0.5,
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        '&:hover': {
-          opacity: 0.8,
-          transform: 'scale(1.02)',
-          color: 'var(--foreground)'
-        }
+    <Text
+      fontSize="1rem"
+      letterSpacing="0.025em"
+      mt={-0.5}
+      cursor="pointer"
+      color={mutedColor}
+      transition="all 0.2s ease"
+      _hover={{
+        opacity: 0.8,
+        transform: 'scale(1.02)',
+        color: hoverColor
       }}
+      onClick={handleClick}
     >
       {subtitle}
-    </Typography>
+    </Text>
   );
 }

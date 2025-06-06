@@ -1,13 +1,28 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense, useRef } from 'react';
-import { TextField, InputAdornment, IconButton, Box, Button, CircularProgress, Container, Typography } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
 import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  Input,
+  InputGroup,
+  InputRightElement,
+  IconButton,
+  Box,
+  Button,
+  Spinner,
+  Container,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react';
+import { SearchIcon, CloseIcon } from '@chakra-ui/icons';
 import debounce from 'lodash/debounce';
 
-function SearchContent() {
+interface SearchWrapperProps {
+  onSearch: (query: string) => void;
+  isLoading?: boolean;
+}
+
+function SearchContent({ onSearch, isLoading }: SearchWrapperProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -30,8 +45,9 @@ function SearchContent() {
       params.set('page', '1');
       router.push(`/?${params.toString()}`);
       setIsSearching(false);
+      onSearch(query);
     },
-    [searchParams, router]
+    [searchParams, router, onSearch]
   );
 
   useEffect(() => {
@@ -59,69 +75,54 @@ function SearchContent() {
       mx: 'auto',
       px: { xs: 2, sm: 0 }
     }}>
-      <TextField
-        fullWidth
-        size="small"
-        placeholder="Search by title, author, genre, ISBN..."
-        value={searchQuery}
-        onChange={(e) => {
-          setSearchQuery(e.target.value);
-          handleSearch(e.target.value);
-        }}
-        onKeyDown={handleKeyDown}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ fontSize: '1.25rem', color: 'var(--muted-foreground)' }} />
-            </InputAdornment>
-          ),
-          endAdornment: (
-            <InputAdornment position="end">
-              {isSearching ? (
-                <CircularProgress size={20} sx={{ mr: 1 }} />
-              ) : searchQuery ? (
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setSearchQuery('');
-                    handleSearch('');
-                  }}
-                  startIcon={<ClearIcon sx={{ fontSize: '1rem' }} />}
-                  sx={{
-                    fontSize: '1rem',
-                    minWidth: 'auto',
-                    px: 1,
-                    py: 0.5,
-                    color: 'text.secondary',
-                    textTransform: 'none',
-                    '&:hover': {
-                      backgroundColor: 'transparent',
-                      color: 'text.primary'
-                    }
-                  }}
-                >
-                  Clear
-                </Button>
-              ) : null}
-            </InputAdornment>
-          ),
-          sx: {
-            fontSize: '1rem',
-            '& .MuiInputBase-input': {
-              py: 1.5,
-            },
-          },
-        }}
-      />
+      <InputGroup size="lg">
+        <Input
+          placeholder="Search books..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            handleSearch(e.target.value);
+          }}
+          onKeyPress={handleKeyDown}
+          pr="4.5rem"
+        />
+        <InputRightElement width="4.5rem">
+          {searchQuery && (
+            <IconButton
+              aria-label="Clear search"
+              icon={<CloseIcon />}
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setSearchQuery('');
+                handleSearch('');
+              }}
+              mr={2}
+            />
+          )}
+          <Button
+            h="1.75rem"
+            size="sm"
+            onClick={() => {
+              handleSearch(searchQuery);
+            }}
+            isLoading={isSearching || isLoading}
+            loadingText="Searching..."
+            spinner={<Spinner size="sm" />}
+          >
+            <SearchIcon />
+          </Button>
+        </InputRightElement>
+      </InputGroup>
     </Box>
   );
 }
 
 // Wrap the component in a client-side only wrapper
-export default function SearchWrapper() {
+export default function SearchWrapper(props: SearchWrapperProps) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SearchContent />
+      <SearchContent {...props} />
     </Suspense>
   );
 }

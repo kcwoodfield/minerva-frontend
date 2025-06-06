@@ -5,7 +5,12 @@ import logoLight from '/public/logo/minerva-logo.png';
 import logoDark from '/public/logo/minerva-logo-dark.png';
 import Image from 'next/image';
 import AddBook from "@/components/addbook";
-import { AppBar, Toolbar, Typography, Box } from '@mui/material';
+import {
+  Box,
+  Flex,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import ThemeToggle from './ThemeToggle';
 import Subtitle from './Subtitle';
 import { useTheme } from 'next-themes';
@@ -13,42 +18,48 @@ import { useTheme } from 'next-themes';
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
     const { resolvedTheme } = useTheme();
+    const bgColor = useColorModeValue('transparent', 'transparent');
 
     return (
-        <AppBar
+        <Box
+            as="header"
             position="static"
-            color="default"
-            elevation={0}
-            sx={{
-                backgroundColor: 'transparent',
-            }}
+            bg={bgColor}
+            boxShadow="none"
         >
-            <Toolbar sx={{ justifyContent: 'space-between' }}>
-                <Box sx={{ flex: 1 }} />
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    '& > *:not(:last-child)': {
-                        mb: 0.5
-                    }
-                }}>
+            <Flex
+                as="nav"
+                align="center"
+                justify="space-between"
+                wrap="wrap"
+                padding="1.5rem"
+            >
+                <Box flex="1" />
+                <Flex
+                    direction="column"
+                    align="center"
+                    gap={2}
+                >
                     <Image
                         src={resolvedTheme === 'dark' ? logoDark : logoLight}
                         alt="Minerva Logo"
                         width={80}
                         height={80}
                     />
-                    <Typography variant="h6" component="div" sx={{ fontSize: '2rem', mb: 0 }}>
+                    <Text
+                        fontSize="2rem"
+                        fontWeight="bold"
+                        mb={0}
+                    >
                         Minerva
-                    </Typography>
+                    </Text>
                     <Subtitle />
-                </Box>
-                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                </Flex>
+                <Box flex="1" display="flex" justifyContent="flex-end">
                     <ThemeToggle />
                 </Box>
-            </Toolbar>
-        </AppBar>
+            </Flex>
+        </Box>
     );
 };
 

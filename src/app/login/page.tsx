@@ -5,18 +5,27 @@ import { useRouter } from 'next/navigation';
 import {
   Box,
   Container,
-  TextField,
+  Input,
   Button,
-  Paper,
-  Typography,
-  Alert
-} from '@mui/material';
+  VStack,
+  Text,
+  Alert,
+  AlertIcon,
+  FormControl,
+  FormLabel,
+  useColorModeValue,
+} from '@chakra-ui/react';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
+
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const buttonBg = useColorModeValue('blue.500', 'blue.200');
+  const buttonColor = useColorModeValue('white', 'gray.800');
+  const buttonHoverBg = useColorModeValue('blue.600', 'blue.300');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,68 +52,72 @@ export default function LoginPage() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container maxW="xs">
       <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          mt: 8,
-        }}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        mt={8}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
-          }}
+        <Box
+          bg={bgColor}
+          p={8}
+          borderRadius="md"
+          boxShadow="lg"
+          width="100%"
         >
+          <VStack
+            as="form"
+            onSubmit={handleSubmit}
+            spacing={4}
+            width="100%"
+          >
+            <FormControl isRequired>
+              <FormLabel>Username</FormLabel>
+              <Input
+                id="username"
+                name="username"
+                autoComplete="username"
+                autoFocus
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </FormControl>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <FormControl isRequired>
+              <FormLabel>Password</FormLabel>
+              <Input
+                type="password"
+                id="password"
+                name="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </FormControl>
 
             {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
+              <Alert status="error" mt={2}>
+                <AlertIcon />
                 {error}
               </Alert>
             )}
 
             <Button
               type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              width="100%"
+              mt={4}
+              mb={2}
+              bg={buttonBg}
+              color={buttonColor}
+              _hover={{
+                bg: buttonHoverBg
+              }}
             >
               Sign In
             </Button>
-          </Box>
-        </Paper>
+          </VStack>
+        </Box>
       </Box>
     </Container>
   );
