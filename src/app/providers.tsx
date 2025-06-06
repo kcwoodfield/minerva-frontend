@@ -4,10 +4,15 @@ import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/st
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from 'next-themes';
 import { useTheme } from 'next-themes';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 function MuiProvider({ children }: { children: React.ReactNode }) {
   const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const theme = useMemo(
     () =>
@@ -31,6 +36,10 @@ function MuiProvider({ children }: { children: React.ReactNode }) {
     [resolvedTheme]
   );
 
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
@@ -40,6 +49,16 @@ function MuiProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <MuiProvider>{children}</MuiProvider>

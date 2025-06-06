@@ -69,20 +69,6 @@ function SearchContent() {
           handleSearch(e.target.value);
         }}
         onKeyDown={handleKeyDown}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: 'white',
-            '& fieldset': {
-              borderColor: 'rgba(0, 0, 0, 0.23)',
-            },
-            '&:hover fieldset': {
-              borderColor: 'rgba(0, 0, 0, 0.23)',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: 'primary.main',
-            },
-          },
-        }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -131,13 +117,10 @@ function SearchContent() {
   );
 }
 
+// Wrap the component in a client-side only wrapper
 export default function SearchWrapper() {
   return (
-    <Suspense fallback={
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography>Loading search...</Typography>
-      </Container>
-    }>
+    <Suspense fallback={<div>Loading...</div>}>
       <SearchContent />
     </Suspense>
   );

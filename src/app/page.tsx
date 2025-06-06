@@ -13,9 +13,10 @@ import PaginationControls from '@/components/PaginationControls';
 import { Book } from '@/types/book';
 import { SelectChangeEvent } from '@mui/material/Select';
 
-// Dynamically import SearchWrapper with SSR disabled
+// Dynamically import SearchWrapper with SSR disabled and loading state
 const SearchWrapper = dynamic(() => import('@/components/SearchWrapper'), {
-  ssr: false
+  ssr: false,
+  loading: () => <div>Loading search...</div>
 });
 
 function PageContent() {
