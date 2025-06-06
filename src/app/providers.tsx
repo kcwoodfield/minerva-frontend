@@ -6,8 +6,8 @@ import { useState, useEffect } from 'react'
 
 const theme = extendTheme({
   fonts: {
-    body: 'var(--font-eb-garamond)',
-    heading: 'var(--font-eb-garamond)',
+    body: 'Arial, sans-serif',
+    heading: 'Arial, sans-serif',
   },
   config: {
     initialColorMode: 'system',

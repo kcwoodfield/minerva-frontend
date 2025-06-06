@@ -25,14 +25,12 @@ export default function PaginationControls({ page, totalPages, onPageChange }: P
         px={6}
         py={2}
         minW="80px"
-        fontFamily="var(--font-eb-garamond)"
         fontSize="0.875rem"
       >
         Previous
       </Button>
       <Text
         mx={4}
-        fontFamily="var(--font-eb-garamond)"
         pt={1}
         fontSize="1rem"
       >
@@ -50,7 +48,6 @@ export default function PaginationControls({ page, totalPages, onPageChange }: P
         px={6}
         py={2}
         minW="80px"
-        fontFamily="var(--font-eb-garamond)"
         fontSize="0.875rem"
       >
         Next

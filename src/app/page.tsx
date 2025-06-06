@@ -18,8 +18,6 @@ import SearchWrapper from '@/components/SearchWrapper';
 import TableControls from '@/components/TableControls';
 import { Book } from '@/types/book';
 
-type SortColumn = 'title' | 'author' | 'pages' | 'rating' | 'completed' | 'date_added';
-
 export default function Home() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,9 +25,8 @@ export default function Home() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [sort, setSort] = useState<SortColumn>('date_added');
-  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Book; direction: 'asc' | 'desc' } | null>(null);
   const toast = useToast();
   const bgColor = useColorModeValue('white', 'gray.800');
 
@@ -39,13 +36,20 @@ export default function Home() {
 
   const fetchBooks = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`);
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`;
+      console.log('Fetching books from:', apiUrl);
+
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error('Failed to fetch books');
       }
       const data = await response.json();
-      setBooks(Array.isArray(data) ? data : []);
+      console.log('API Response:', data);
+
+      // Handle paginated response
+      setBooks(Array.isArray(data.items) ? data.items : []);
     } catch (err) {
+      console.error('Error fetching books:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
       toast({
         title: 'Error fetching books',
@@ -155,44 +159,40 @@ export default function Home() {
     }
   };
 
-  const handleSort = (column: SortColumn) => {
-    if (sort === column) {
-      setOrder(order === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSort(column);
-      setOrder('asc');
-    }
-  };
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
 
-  const filteredBooks = books
-    .filter(book => {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        book.title.toLowerCase().includes(searchLower) ||
-        book.author.toLowerCase().includes(searchLower)
-      );
-    })
-    .sort((a, b) => {
-      const modifier = order === 'asc' ? 1 : -1;
+  const filteredBooks = books.filter(book => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      book.title.toLowerCase().includes(searchLower) ||
+      book.author.toLowerCase().includes(searchLower)
+    );
+  });
 
-      switch (sort) {
-        case 'date_added':
-          return (new Date(a.date_added).getTime() - new Date(b.date_added).getTime()) * modifier;
-        case 'title':
-        case 'author':
-          return (a[sort] as string).localeCompare(b[sort] as string) * modifier;
-        case 'pages':
-        case 'rating':
-        case 'completed':
-          return ((a[sort] as number) - (b[sort] as number)) * modifier;
-        default:
-          return 0;
-      }
-    });
+  const handleSort = (key: keyof Book) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedAndFilteredBooks = [...filteredBooks].sort((a, b) => {
+    if (!sortConfig) return 0;
+
+    const { key, direction } = sortConfig;
+    const aValue = a[key];
+    const bValue = b[key];
+
+    if (aValue === bValue) return 0;
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    const comparison = aValue < bValue ? -1 : 1;
+    return direction === 'asc' ? comparison : -comparison;
+  });
 
   if (error) {
     return (
@@ -224,24 +224,15 @@ export default function Home() {
 
       <TableControls
         totalBooks={filteredBooks.length}
-        onClearFilters={() => {
-          setSearchQuery('');
-          setSort('date_added');
-          setOrder('desc');
-        }}
-        sort={sort}
-        order={order}
-        onSortChange={(e) => setSort(e.target.value as SortColumn)}
-        onOrderChange={(e) => setOrder(e.target.value as 'asc' | 'desc')}
-        hasFilters={searchQuery !== '' || sort !== 'date_added' || order !== 'desc'}
+        onClearFilters={() => setSearchQuery('')}
+        hasFilters={searchQuery !== ''}
       />
 
       <BookTable
-        books={filteredBooks}
-        sort={sort}
-        order={order}
-        onSort={handleSort}
+        books={sortedAndFilteredBooks}
         onBookClick={setSelectedBook}
+        onSort={handleSort}
+        sortConfig={sortConfig}
       />
 
       <AddBookModal
@@ -252,11 +243,10 @@ export default function Home() {
 
       {selectedBook && (
         <BookDetails
-          book={selectedBook}
           isOpen={!!selectedBook}
           onClose={() => setSelectedBook(null)}
+          book={selectedBook}
           onEdit={(book) => {
-            setSelectedBook(book);
             setIsEditModalOpen(true);
           }}
           onDelete={handleDeleteBook}
@@ -265,9 +255,12 @@ export default function Home() {
 
       {selectedBook && (
         <EditBookModal
-          book={selectedBook}
           isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedBook(null);
+          }}
+          book={selectedBook}
           onSave={handleEditBook}
         />
       )}

@@ -20,10 +20,13 @@ function ThemeToggleContent() {
   // Sync theme with URL on mount
   useEffect(() => {
     const themeParam = searchParams.get('theme');
-    if (themeParam && (themeParam === 'dark' || themeParam === 'light')) {
-      toggleColorMode();
+    if (themeParam && (themeParam === 'dark' || themeParam === 'light') && mounted) {
+      if ((themeParam === 'dark' && colorMode === 'light') ||
+          (themeParam === 'light' && colorMode === 'dark')) {
+        toggleColorMode();
+      }
     }
-  }, [searchParams, toggleColorMode]);
+  }, [mounted, searchParams, colorMode, toggleColorMode]);
 
   const handleThemeChange = () => {
     toggleColorMode();

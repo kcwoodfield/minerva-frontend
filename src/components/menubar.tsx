@@ -12,29 +12,31 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import ThemeToggle from './ThemeToggle';
-import Subtitle from './Subtitle';
 import { useTheme } from 'next-themes';
 
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
     const { resolvedTheme } = useTheme();
-    const bgColor = useColorModeValue('transparent', 'transparent');
+    const bgColor = useColorModeValue('white', 'gray.800');
 
     return (
         <Box
             as="header"
             position="static"
             bg={bgColor}
-            boxShadow="none"
+            width="100%"
         >
             <Flex
                 as="nav"
                 align="center"
                 justify="space-between"
                 wrap="wrap"
-                padding="1.5rem"
+                padding="0.75rem 1.5rem"
+                mx="auto"
             >
-                <Box flex="1" />
+                <Box>
+                    <AddBook />
+                </Box>
                 <Flex
                     direction="column"
                     align="center"
@@ -53,9 +55,8 @@ const MenuBar: React.FC = () => {
                     >
                         Minerva
                     </Text>
-                    <Subtitle />
                 </Flex>
-                <Box flex="1" display="flex" justifyContent="flex-end">
+                <Box>
                     <ThemeToggle />
                 </Box>
             </Flex>

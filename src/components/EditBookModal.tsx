@@ -31,9 +31,9 @@ interface EditBookModalProps {
 export default function EditBookModal({ book, isOpen, onClose, onSave }: EditBookModalProps) {
   const [title, setTitle] = useState(book.title);
   const [author, setAuthor] = useState(book.author);
-  const [pages, setPages] = useState(book.pages);
-  const [rating, setRating] = useState(book.rating);
-  const [completed, setCompleted] = useState(book.completed);
+  const [pages, setPages] = useState(book.pages || 0);
+  const [rating, setRating] = useState(book.rating || 0);
+  const [completed, setCompleted] = useState(book.completed || 0);
   const [isSaving, setIsSaving] = useState(false);
   const toast = useToast();
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -52,12 +52,6 @@ export default function EditBookModal({ book, isOpen, onClose, onSave }: EditBoo
         completed,
       };
       await onSave(updatedBook);
-      toast({
-        title: 'Book updated',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
       onClose();
     } catch (error) {
       toast({

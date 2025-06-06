@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: #fdfdf9;
+  --background: #fefffa;
   --foreground: #171717;
   --border: #e5e5e5;
   --primary: #2563eb;
@@ -17,7 +17,6 @@
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --ring: #d1d5db;
-  --font-eb-garamond: 'EB Garamond', serif;
 }
 
 .dark {
@@ -46,7 +45,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
     background-color: var(--background);
-    font-family: var(--font-eb-garamond);
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
   }
@@ -111,7 +110,7 @@
 
 @layer base {
   body {
-    @apply font-eb-garamond;
+    @apply font-sans;
   }
 }
 

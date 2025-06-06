@@ -7,21 +7,20 @@ import {
   Td,
   Box,
   useColorModeValue,
+  IconButton,
 } from '@chakra-ui/react';
 import { Book } from '@/types/book';
-
-type SortColumn = 'title' | 'author' | 'pages' | 'rating' | 'completed' | 'date_added';
+import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
 
 interface BookTableProps {
   books: Book[];
-  sort: SortColumn;
-  order: 'asc' | 'desc';
-  onSort: (column: SortColumn) => void;
   onBookClick: (book: Book) => void;
+  onSort: (key: keyof Book) => void;
+  sortConfig: { key: keyof Book; direction: 'asc' | 'desc' } | null;
 }
 
-export default function BookTable({ books, sort, order, onSort, onBookClick }: BookTableProps) {
-  const columns: { key: SortColumn; label: string; width: string }[] = [
+export default function BookTable({ books, onBookClick, onSort, sortConfig }: BookTableProps) {
+  const columns: { key: keyof Book; label: string; width: string }[] = [
     { key: 'title', label: 'Title', width: '300px' },
     { key: 'author', label: 'Author', width: '200px' },
     { key: 'pages', label: 'Length (Pages)', width: '120px' },
@@ -32,6 +31,7 @@ export default function BookTable({ books, sort, order, onSort, onBookClick }: B
 
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
   const bgColor = useColorModeValue('white', 'gray.800');
+  const headerHoverBg = useColorModeValue('gray.100', 'gray.600');
 
   return (
     <Box
@@ -47,9 +47,7 @@ export default function BookTable({ books, sort, order, onSort, onBookClick }: B
             {columns.map(col => (
               <Th
                 key={col.key}
-                onClick={() => onSort(col.key)}
-                cursor="pointer"
-                fontWeight={sort === col.key ? '700' : '600'}
+                fontWeight="600"
                 fontSize="1rem"
                 py={3}
                 px={4}
@@ -58,11 +56,17 @@ export default function BookTable({ books, sort, order, onSort, onBookClick }: B
                 width={col.width}
                 minWidth={col.width}
                 maxWidth={col.width}
+                cursor="pointer"
+                onClick={() => onSort(col.key)}
+                _hover={{ bg: headerHoverBg }}
+                position="relative"
               >
-                {col.label}
-                {sort === col.key && (
-                  <Box as="span" ml={1}>{order === 'asc' ? '↑' : '↓'}</Box>
-                )}
+                <Box display="flex" alignItems="center" gap={2}>
+                  {col.label}
+                  {sortConfig?.key === col.key && (
+                    sortConfig.direction === 'asc' ? <ChevronUpIcon /> : <ChevronDownIcon />
+                  )}
+                </Box>
               </Th>
             ))}
           </Tr>

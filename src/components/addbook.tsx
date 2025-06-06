@@ -1,8 +1,9 @@
 "use client"
 
 import React from 'react';
-import { AddIcon } from '@chakra-ui/icons';
+import { IoAdd } from 'react-icons/io5';
 import {
+    IconButton,
     Button,
     VStack,
     Box,
@@ -10,14 +11,12 @@ import {
     FormControl,
     FormLabel,
     Select,
-    Drawer,
-    DrawerBody,
-    DrawerHeader,
-    DrawerOverlay,
-    DrawerContent,
-    DrawerCloseButton,
-    IconButton,
-    Text,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
     useColorModeValue,
 } from '@chakra-ui/react';
 
@@ -26,38 +25,35 @@ const AddBook: React.FC = () => {
     const buttonBg = useColorModeValue('blue.500', 'blue.200');
     const buttonColor = useColorModeValue('white', 'gray.800');
     const buttonHoverBg = useColorModeValue('blue.600', 'blue.300');
-    const drawerBg = useColorModeValue('white', 'gray.800');
+    const modalBg = useColorModeValue('white', 'gray.800');
 
     const handleOpen = () => setIsOpen(true);
     const handleClose = () => setIsOpen(false);
 
     return (
         <>
-            <Button
-                leftIcon={<AddIcon />}
+            <IconButton
+                aria-label="Add new book"
+                icon={<IoAdd size="24px" />}
                 onClick={handleOpen}
                 ml={4}
-                bg={buttonBg}
-                color={buttonColor}
+                bg="white"
+                color="black"
                 _hover={{
-                    bg: buttonHoverBg
+                    bg: 'gray.50'
                 }}
-            >
-                Create user
-            </Button>
-            <Drawer
-                isOpen={isOpen}
-                placement="right"
-                onClose={handleClose}
-            >
-                <DrawerOverlay />
-                <DrawerContent bg={drawerBg}>
-                    <DrawerCloseButton />
-                    <DrawerHeader borderBottomWidth="1px">
+                size="lg"
+                isRound
+                boxShadow="md"
+            />
+            <Modal isOpen={isOpen} onClose={handleClose} size="md">
+                <ModalOverlay />
+                <ModalContent bg={modalBg}>
+                    <ModalHeader borderBottomWidth="1px">
                         Create a new account
-                    </DrawerHeader>
-
-                    <DrawerBody>
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody py={6}>
                         <VStack spacing={4} align="stretch">
                             <FormControl>
                                 <FormLabel>Name</FormLabel>
@@ -121,13 +117,13 @@ const AddBook: React.FC = () => {
                                         bg: buttonHoverBg
                                     }}
                                 >
-                                    Submit
+                                    Create
                                 </Button>
                             </Box>
                         </VStack>
-                    </DrawerBody>
-                </DrawerContent>
-            </Drawer>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
         </>
     );
 };
