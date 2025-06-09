@@ -61,12 +61,12 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
       <ModalContent maxW="800px" bg={bgColor}>
         <ModalHeader>
           <Text fontSize="2xl" fontFamily="EB Garamond">{book.title}</Text>
-          {book.rating && (
+          {book.rating !== undefined && book.rating !== null && (
             <HStack spacing={1} mt={2}>
               {[...Array(5)].map((_, index) => (
                 <StarIcon
                   key={index}
-                  color={index < book.rating ? "yellow.400" : "gray.200"}
+                  color={index < book.rating! ? "yellow.400" : "gray.200"}
                 />
               ))}
               <Text fontFamily="EB Garamond" ml={2}>({book.rating}/5)</Text>
@@ -140,16 +140,16 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
               <Text fontWeight="bold" fontFamily="EB Garamond">Date Added</Text>
               <Text fontFamily="EB Garamond">{new Date(book.date_added).toLocaleDateString()}</Text>
             </GridItem>
-            {book.summary && (
-              <GridItem colSpan={2}>
-                <Text fontWeight="bold" fontFamily="EB Garamond">Summary</Text>
-                <Text fontFamily="EB Garamond" whiteSpace="pre-wrap">{book.summary}</Text>
-              </GridItem>
-            )}
             {book.review && (
               <GridItem colSpan={2}>
                 <Text fontWeight="bold" fontFamily="EB Garamond">Review</Text>
                 <Text fontFamily="EB Garamond" whiteSpace="pre-wrap">{book.review}</Text>
+              </GridItem>
+            )}
+            {book.summary && (
+              <GridItem colSpan={2}>
+                <Text fontWeight="bold" fontFamily="EB Garamond">Summary</Text>
+                <Text fontFamily="EB Garamond" whiteSpace="pre-wrap">{book.summary}</Text>
               </GridItem>
             )}
             {book.tags && book.tags.length > 0 && (

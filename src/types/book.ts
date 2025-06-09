@@ -1,8 +1,9 @@
 export interface Book {
   id: string;
   title: string;
+  subtitle?: string;
   author: string;
-  isbn_13: string;
+  isbn_13?: string;
   isbn_10?: string;
   publisher?: string;
   publication_date?: string;
@@ -13,9 +14,9 @@ export interface Book {
   format?: string;
   edition?: string;
   summary?: string;
-  tags: string[];
+  tags?: string[];
   cover_image_url?: string;
-  rating: number;
+  rating?: number;
   review?: string;
   related_books?: {
     title: string;
