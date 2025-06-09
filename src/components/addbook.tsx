@@ -18,24 +18,56 @@ import {
     ModalBody,
     ModalCloseButton,
     useColorModeValue,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    Slider,
+    SliderTrack,
+    SliderFilledTrack,
+    SliderThumb,
+    SliderMark,
+    Grid,
+    GridItem,
+    HStack,
+    Image,
+    useDisclosure,
+    useColorMode,
 } from '@chakra-ui/react';
 
 const AddBook: React.FC = () => {
-    const [isOpen, setIsOpen] = React.useState(false);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { colorMode } = useColorMode();
+    const [title, setTitle] = React.useState('');
+    const [author, setAuthor] = React.useState('');
+    const [isbn13, setIsbn13] = React.useState('');
+    const [isbn10, setIsbn10] = React.useState('');
+    const [publisher, setPublisher] = React.useState('');
+    const [publicationDate, setPublicationDate] = React.useState('');
+    const [genre, setGenre] = React.useState('');
+    const [subGenre, setSubGenre] = React.useState('');
+    const [summary, setSummary] = React.useState('');
+    const [tags, setTags] = React.useState('');
+    const [review, setReview] = React.useState('');
+    const [pages, setPages] = React.useState(0);
+    const [completion, setCompletion] = React.useState(0);
+
     const buttonBg = useColorModeValue('blue.500', 'blue.200');
     const buttonColor = useColorModeValue('white', 'gray.800');
     const buttonHoverBg = useColorModeValue('blue.600', 'blue.300');
     const modalBg = useColorModeValue('white', 'gray.800');
 
-    const handleOpen = () => setIsOpen(true);
-    const handleClose = () => setIsOpen(false);
+    const handleSubmit = () => {
+        // Handle form submission
+    };
 
     return (
         <>
             <IconButton
                 aria-label="Add new book"
                 icon={<IoAdd size="24px" />}
-                onClick={handleOpen}
+                onClick={onOpen}
                 ml={4}
                 bg="white"
                 color="black"
@@ -46,81 +78,211 @@ const AddBook: React.FC = () => {
                 isRound
                 boxShadow="md"
             />
-            <Modal isOpen={isOpen} onClose={handleClose} size="md">
+            <Modal isOpen={isOpen} onClose={onClose} size={{ base: "md", md: "xl", lg: "2xl" }}>
                 <ModalOverlay />
                 <ModalContent bg={modalBg}>
-                    <ModalHeader borderBottomWidth="1px">
-                        Create a new account
+                    <ModalHeader>
+                        <HStack spacing={3}>
+                            <Image
+                                src={colorMode === 'dark' ? '/logo/minerva-logo-dark.png' : '/logo/minerva-logo.png'}
+                                alt="Minerva Logo"
+                                boxSize="32px"
+                                objectFit="contain"
+                            />
+                            <span>Add New Book</span>
+                        </HStack>
                     </ModalHeader>
                     <ModalCloseButton />
                     <ModalBody py={6}>
-                        <VStack spacing={4} align="stretch">
-                            <FormControl>
-                                <FormLabel>Name</FormLabel>
-                                <Input placeholder="Please enter user name" />
-                            </FormControl>
-
-                            <FormControl>
-                                <FormLabel>Url</FormLabel>
-                                <Box position="relative">
-                                    <Box
-                                        position="absolute"
-                                        left={2}
-                                        top="50%"
-                                        transform="translateY(-50%)"
-                                        color="gray.500"
-                                    >
-                                        http://
-                                    </Box>
+                        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                            <GridItem>
+                                <FormControl isRequired>
+                                    <FormLabel>Title</FormLabel>
                                     <Input
-                                        pl="60px"
-                                        pr="40px"
-                                        placeholder="Please enter domain"
+                                        placeholder="Enter book title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
                                     />
-                                    <Box
-                                        position="absolute"
-                                        right={2}
-                                        top="50%"
-                                        transform="translateY(-50%)"
-                                        color="gray.500"
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl isRequired>
+                                    <FormLabel>Author</FormLabel>
+                                    <Input
+                                        placeholder="Enter author name"
+                                        value={author}
+                                        onChange={(e) => setAuthor(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl isRequired>
+                                    <FormLabel>ISBN-13</FormLabel>
+                                    <Input
+                                        placeholder="Enter ISBN-13"
+                                        value={isbn13}
+                                        onChange={(e) => setIsbn13(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl>
+                                    <FormLabel>ISBN-10</FormLabel>
+                                    <Input
+                                        placeholder="Enter ISBN-10"
+                                        value={isbn10}
+                                        onChange={(e) => setIsbn10(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl>
+                                    <FormLabel>Publisher</FormLabel>
+                                    <Input
+                                        placeholder="Enter publisher name"
+                                        value={publisher}
+                                        onChange={(e) => setPublisher(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl>
+                                    <FormLabel>Publication Date</FormLabel>
+                                    <Input
+                                        type="date"
+                                        value={publicationDate}
+                                        onChange={(e) => setPublicationDate(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl>
+                                    <FormLabel>Genre</FormLabel>
+                                    <Input
+                                        placeholder="Enter genre"
+                                        value={genre}
+                                        onChange={(e) => setGenre(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl>
+                                    <FormLabel>Sub-Genre</FormLabel>
+                                    <Input
+                                        placeholder="Enter sub-genre"
+                                        value={subGenre}
+                                        onChange={(e) => setSubGenre(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem colSpan={2}>
+                                <FormControl>
+                                    <FormLabel>Summary</FormLabel>
+                                    <Input
+                                        as="textarea"
+                                        rows={8}
+                                        resize="vertical"
+                                        placeholder="Enter book summary"
+                                        value={summary}
+                                        onChange={(e) => setSummary(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem colSpan={2}>
+                                <FormControl>
+                                    <FormLabel>Tags (comma separated)</FormLabel>
+                                    <Input
+                                        placeholder="Enter tags separated by commas"
+                                        value={tags}
+                                        onChange={(e) => setTags(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem colSpan={2}>
+                                <FormControl>
+                                    <FormLabel>Review</FormLabel>
+                                    <Input
+                                        as="textarea"
+                                        rows={8}
+                                        resize="vertical"
+                                        placeholder="Enter your review"
+                                        value={review}
+                                        onChange={(e) => setReview(e.target.value)}
+                                    />
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem>
+                                <FormControl isRequired>
+                                    <FormLabel>Pages</FormLabel>
+                                    <NumberInput
+                                        value={pages}
+                                        onChange={(_, value) => setPages(value)}
+                                        min={0}
                                     >
-                                        .com
+                                        <NumberInputField />
+                                        <NumberInputStepper>
+                                            <NumberIncrementStepper />
+                                            <NumberDecrementStepper />
+                                        </NumberInputStepper>
+                                    </NumberInput>
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem colSpan={2}>
+                                <FormControl>
+                                    <FormLabel>Completion</FormLabel>
+                                    <Box pt={6} pb={2}>
+                                        <Slider
+                                            value={completion}
+                                            onChange={(value) => setCompletion(value)}
+                                            min={0}
+                                            max={100}
+                                            step={1}
+                                        >
+                                            <SliderMark value={0} mt="2" ml="-2.5" fontSize="sm">
+                                                0%
+                                            </SliderMark>
+                                            <SliderMark value={50} mt="2" ml="-2.5" fontSize="sm">
+                                                50%
+                                            </SliderMark>
+                                            <SliderMark value={100} mt="2" ml="-2.5" fontSize="sm">
+                                                100%
+                                            </SliderMark>
+                                            <SliderTrack>
+                                                <SliderFilledTrack />
+                                            </SliderTrack>
+                                            <SliderThumb />
+                                        </Slider>
                                     </Box>
+                                </FormControl>
+                            </GridItem>
+
+                            <GridItem colSpan={2}>
+                                <Box display="flex" justifyContent="flex-end" gap={2} mt={4}>
+                                    <Button variant="outline" onClick={onClose}>
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        colorScheme="blue"
+                                        onClick={handleSubmit}
+                                        _hover={{ bg: buttonHoverBg }}
+                                    >
+                                        Add Book
+                                    </Button>
                                 </Box>
-                            </FormControl>
-
-                            <FormControl>
-                                <FormLabel>Select Owner</FormLabel>
-                                <Select defaultValue="lobo">
-                                    <option value="lobo">Lobo the Wolf</option>
-                                    <option value="cat">a cat</option>
-                                </Select>
-                            </FormControl>
-
-                            <FormControl>
-                                <FormLabel>Description</FormLabel>
-                                <Input
-                                    as="textarea"
-                                    rows={4}
-                                    resize="vertical"
-                                />
-                            </FormControl>
-
-                            <Box display="flex" justifyContent="flex-end" gap={2} mt={4}>
-                                <Button variant="outline" onClick={handleClose}>
-                                    Cancel
-                                </Button>
-                                <Button
-                                    bg={buttonBg}
-                                    color={buttonColor}
-                                    _hover={{
-                                        bg: buttonHoverBg
-                                    }}
-                                >
-                                    Create
-                                </Button>
-                            </Box>
-                        </VStack>
+                            </GridItem>
+                        </Grid>
                     </ModalBody>
                 </ModalContent>
             </Modal>

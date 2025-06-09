@@ -1,8 +1,6 @@
 "use client"
 
 import React from 'react';
-import logoLight from '/public/logo/minerva-logo.png';
-import logoDark from '/public/logo/minerva-logo-dark.png';
 import Image from 'next/image';
 import AddBook from "@/components/addbook";
 import {
@@ -10,14 +8,14 @@ import {
   Flex,
   Text,
   useColorModeValue,
+  useColorMode,
 } from '@chakra-ui/react';
 import ThemeToggle from './ThemeToggle';
-import { useTheme } from 'next-themes';
 import Subtitle from './Subtitle';
 
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
-    const { resolvedTheme } = useTheme();
+    const { colorMode } = useColorMode();
     const bgColor = useColorModeValue('transparent', 'gray.800');
     const [subtitleKey, setSubtitleKey] = React.useState(0);
 
@@ -51,7 +49,7 @@ const MenuBar: React.FC = () => {
                     onClick={handleLogoClick}
                 >
                     <Image
-                        src={resolvedTheme === 'dark' ? logoDark : logoLight}
+                        src={colorMode === 'dark' ? '/logo/minerva-logo-dark.png' : '/logo/minerva-logo.png'}
                         alt="Minerva Logo"
                         width={90}
                         height={90}

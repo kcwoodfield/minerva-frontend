@@ -8,8 +8,11 @@ import {
   useToast,
   Box,
   useColorModeValue,
+  Heading,
+  HStack,
+  Tooltip,
 } from '@chakra-ui/react';
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, CloseIcon } from '@chakra-ui/icons';
 import BookTable from '@/components/BookTable';
 import AddBookModal from '@/components/AddBookModal';
 import BookDetails from '@/components/BookDetails';
@@ -27,7 +30,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof Book; direction: 'asc' | 'desc' } | null>(null);
   const toast = useToast();
-  const bgColor = useColorModeValue('white', 'gray.800');
+  const textColor = useColorModeValue('gray.600', 'gray.400');
 
   useEffect(() => {
     fetchBooks();
@@ -98,16 +101,42 @@ export default function Home() {
 
   const handleEditBook = async (book: Book) => {
     try {
+      // Only send the fields that are allowed in the update schema
+      const updateData = {
+        title: book.title,
+        author: book.author,
+        pages: book.pages,
+        rating: book.rating,
+        review: book.review,
+        isbn_13: book.isbn_13,
+        isbn_10: book.isbn_10,
+        completed: book.completed,
+        publisher: book.publisher,
+        publication_date: book.publication_date,
+        genre: book.genre,
+        sub_genre: book.sub_genre,
+        language: book.language,
+        format: book.format,
+        edition: book.edition,
+        summary: book.summary,
+        tags: book.tags,
+        cover_image_url: book.cover_image_url
+      };
+
+      console.log('Sending update data:', updateData);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${book.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(book),
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update book');
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.detail || 'Failed to update book');
       }
 
       const updatedBook = await response.json();
@@ -119,6 +148,7 @@ export default function Home() {
         isClosable: true,
       });
     } catch (err) {
+      console.error('Error updating book:', err);
       toast({
         title: 'Error updating book',
         description: err instanceof Error ? err.message : 'An error occurred',
@@ -129,7 +159,7 @@ export default function Home() {
     }
   };
 
-  const handleDeleteBook = async (bookId: number) => {
+  const handleDeleteBook = async (bookId: string) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${bookId}`, {
         method: 'DELETE',
@@ -195,50 +225,51 @@ export default function Home() {
 
   if (error) {
     return (
-      <Container maxW="container.xl" py={8}>
+      <Container maxW="container.xl" py={2}>
         <Text color="red.500">{error}</Text>
       </Container>
     );
   }
 
   return (
-    <Container maxW="container.xl" py={8}>
-      <Box
-        position="fixed"
-        bottom={8}
-        right={8}
-        zIndex={1000}
-      >
-        <IconButton
-          aria-label="Add book"
-          icon={<AddIcon />}
-          onClick={() => setIsAddModalOpen(true)}
-          colorScheme="blue"
-          size="lg"
-          isRound
-        />
+    <Container maxW="container.xl">
+      <Box mb={8}>
+        <HStack justify="space-between" align="center" mb={4}>
+          <HStack spacing={4}>
+            {(searchQuery || sortConfig) && (
+              <Tooltip label="Clear all filters">
+                <IconButton
+                  aria-label="Clear filters"
+                  icon={<CloseIcon />}
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSortConfig(null);
+                  }}
+                />
+              </Tooltip>
+            )}
+            <AddBookModal
+              isOpen={isAddModalOpen}
+              onClose={() => setIsAddModalOpen(false)}
+              onAdd={handleAddBook}
+            />
+          </HStack>
+        </HStack>
+
+        <SearchWrapper onSearch={handleSearch} />
       </Box>
-
-      <SearchWrapper
-        onSearch={setSearchQuery}
-        onClearFilters={() => {
-          setSearchQuery('');
-          setSortConfig(null);
-        }}
-        hasFilters={!!searchQuery || !!sortConfig}
-      />
-
       <BookTable
         books={sortedAndFilteredBooks}
         onBookClick={setSelectedBook}
         onSort={handleSort}
         sortConfig={sortConfig}
-      />
-
-      <AddBookModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddBook}
+        hasFilters={!!searchQuery || !!sortConfig}
+        onClearFilters={() => {
+          setSearchQuery('');
+          setSortConfig(null);
+        }}
       />
 
       {selectedBook && (

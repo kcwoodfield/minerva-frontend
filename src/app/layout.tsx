@@ -4,9 +4,6 @@ import MenuBar from "@/components/menubar";
 import './globals.css'
 import { headers } from 'next/headers';
 import { Box } from '@chakra-ui/react';
-import { Space_Grotesk } from 'next/font/google';
-
-const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: "Minerva, organize your books.",
@@ -24,7 +21,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={spaceGrotesk.className} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Providers>
           {!isLoginPage && <MenuBar />}
           <Box minH="100vh" maxW="7xl" mx="auto" py={6} px={{ base: 4, sm: 6, lg: 8 }}>

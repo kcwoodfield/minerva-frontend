@@ -8,18 +8,21 @@ import {
   Box,
   useColorModeValue,
   IconButton,
+  Tooltip,
 } from '@chakra-ui/react';
 import { Book } from '@/types/book';
-import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
+import { ChevronUpIcon, ChevronDownIcon, CloseIcon } from '@chakra-ui/icons';
 
 interface BookTableProps {
   books: Book[];
   onBookClick: (book: Book) => void;
   onSort: (key: keyof Book) => void;
   sortConfig: { key: keyof Book; direction: 'asc' | 'desc' } | null;
+  hasFilters: boolean;
+  onClearFilters: () => void;
 }
 
-export default function BookTable({ books, onBookClick, onSort, sortConfig }: BookTableProps) {
+export default function BookTable({ books, onBookClick, onSort, sortConfig, hasFilters, onClearFilters }: BookTableProps) {
   const columns: { key: keyof Book; label: string; width: string }[] = [
     { key: 'title', label: 'Title', width: '300px' },
     { key: 'author', label: 'Author', width: '200px' },
@@ -42,6 +45,7 @@ export default function BookTable({ books, onBookClick, onSort, sortConfig }: Bo
       pb={4}
       mt={6}
     >
+
       <Table>
         <Thead>
           <Tr>
