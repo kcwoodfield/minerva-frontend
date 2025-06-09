@@ -43,6 +43,21 @@ const theme = extendTheme({
         fontFamily: ebGaramond.style.fontFamily,
       },
     },
+    Table: {
+      baseStyle: {
+        fontFamily: ebGaramond.style.fontFamily,
+      },
+    },
+    Th: {
+      baseStyle: {
+        fontFamily: ebGaramond.style.fontFamily,
+      },
+    },
+    Td: {
+      baseStyle: {
+        fontFamily: ebGaramond.style.fontFamily,
+      },
+    },
   },
   config: {
     initialColorMode: 'system',
