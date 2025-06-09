@@ -11,13 +11,16 @@ import {
   Heading,
   HStack,
   Tooltip,
+  Flex,
 } from '@chakra-ui/react';
 import { AddIcon, CloseIcon } from '@chakra-ui/icons';
+import { useSearchParams, useRouter } from 'next/navigation';
 import BookTable from '@/components/BookTable';
 import AddBookModal from '@/components/AddBookModal';
 import BookDetails from '@/components/BookDetails';
 import EditBookModal from '@/components/EditBookModal';
 import SearchWrapper from '@/components/SearchWrapper';
+import PaginationControls from '@/components/PaginationControls';
 import { Book } from '@/types/book';
 
 export default function Home() {
@@ -29,8 +32,34 @@ export default function Home() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof Book; direction: 'asc' | 'desc' } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
   const toast = useToast();
   const textColor = useColorModeValue('gray.600', 'gray.400');
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Read initial parameters from URL
+    const sortKey = searchParams.get('sort');
+    const sortDirection = searchParams.get('direction') as 'asc' | 'desc';
+    const page = searchParams.get('page');
+    const bookId = searchParams.get('book');
+
+    if (sortKey && sortDirection && ['asc', 'desc'].includes(sortDirection)) {
+      setSortConfig({ key: sortKey as keyof Book, direction: sortDirection });
+    }
+    if (page) {
+      setCurrentPage(parseInt(page, 10));
+    }
+    if (bookId) {
+      // Find the book in the current books array
+      const book = books.find(b => b.id === bookId);
+      if (book) {
+        setSelectedBook(book);
+      }
+    }
+  }, [searchParams, books]);
 
   useEffect(() => {
     fetchBooks();
@@ -205,7 +234,58 @@ export default function Home() {
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
-    setSortConfig({ key, direction });
+
+    // Update sort config
+    const newSortConfig = { key, direction };
+    setSortConfig(newSortConfig);
+
+    // Update URL with new sort parameters
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('sort', key);
+    params.set('direction', direction);
+    router.push(`?${params.toString()}`);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+
+    // Update URL with new page
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', newPage.toString());
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleBookClick = (book: Book) => {
+    setSelectedBook(book);
+
+    // Update URL with book ID
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('book', book.id);
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleCloseBookDetails = () => {
+    setSelectedBook(null);
+
+    // Remove book ID from URL
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('book');
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSortConfig(null);
+    setCurrentPage(1);
+    setSelectedBook(null);
+
+    // Clear all parameters from URL
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('sort');
+    params.delete('direction');
+    params.delete('page');
+    params.delete('book');
+    router.push(`?${params.toString()}`);
   };
 
   const sortedAndFilteredBooks = [...filteredBooks].sort((a, b) => {
@@ -223,6 +303,12 @@ export default function Home() {
     return direction === 'asc' ? comparison : -comparison;
   });
 
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedAndFilteredBooks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentBooks = sortedAndFilteredBooks.slice(startIndex, endIndex);
+
   if (error) {
     return (
       <Container maxW="container.xl" py={2}>
@@ -234,22 +320,26 @@ export default function Home() {
   return (
     <Container maxW="container.xl">
       <Box mb={8}>
+        <Box display="flex" alignItems="center" mb={4} maxW="600px" mx="auto">
+          <Box flex="1">
+            <SearchWrapper onSearch={handleSearch} />
+          </Box>
+          {(searchQuery || sortConfig) && (
+            <Tooltip label="Clear all filters">
+              <IconButton
+                className="clear-filters-button"
+                aria-label="Clear filters"
+                icon={<CloseIcon />}
+                size="sm"
+                variant="ghost"
+                ml={2}
+                onClick={handleClearFilters}
+              />
+            </Tooltip>
+          )}
+        </Box>
         <HStack justify="space-between" align="center" mb={4}>
           <HStack spacing={4}>
-            {(searchQuery || sortConfig) && (
-              <Tooltip label="Clear all filters">
-                <IconButton
-                  aria-label="Clear filters"
-                  icon={<CloseIcon />}
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSortConfig(null);
-                  }}
-                />
-              </Tooltip>
-            )}
             <AddBookModal
               isOpen={isAddModalOpen}
               onClose={() => setIsAddModalOpen(false)}
@@ -258,43 +348,50 @@ export default function Home() {
           </HStack>
         </HStack>
 
-        <SearchWrapper onSearch={handleSearch} />
+        <BookTable
+          books={currentBooks}
+          onBookClick={handleBookClick}
+          onSort={handleSort}
+          sortConfig={sortConfig}
+          hasFilters={!!searchQuery || !!sortConfig}
+          onClearFilters={handleClearFilters}
+        />
+
+        <Flex justify="space-between" align="center" mt={4}>
+          <Text color={textColor}>
+            Showing {startIndex + 1}-{Math.min(endIndex, sortedAndFilteredBooks.length)} of {sortedAndFilteredBooks.length} books
+          </Text>
+          <PaginationControls
+            page={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </Flex>
+
+        {selectedBook && (
+          <BookDetails
+            isOpen={!!selectedBook}
+            onClose={handleCloseBookDetails}
+            book={selectedBook}
+            onEdit={(book) => {
+              setIsEditModalOpen(true);
+            }}
+            onDelete={handleDeleteBook}
+          />
+        )}
+
+        {selectedBook && (
+          <EditBookModal
+            isOpen={isEditModalOpen}
+            onClose={() => {
+              setIsEditModalOpen(false);
+              setSelectedBook(null);
+            }}
+            book={selectedBook}
+            onSave={handleEditBook}
+          />
+        )}
       </Box>
-      <BookTable
-        books={sortedAndFilteredBooks}
-        onBookClick={setSelectedBook}
-        onSort={handleSort}
-        sortConfig={sortConfig}
-        hasFilters={!!searchQuery || !!sortConfig}
-        onClearFilters={() => {
-          setSearchQuery('');
-          setSortConfig(null);
-        }}
-      />
-
-      {selectedBook && (
-        <BookDetails
-          isOpen={!!selectedBook}
-          onClose={() => setSelectedBook(null)}
-          book={selectedBook}
-          onEdit={(book) => {
-            setIsEditModalOpen(true);
-          }}
-          onDelete={handleDeleteBook}
-        />
-      )}
-
-      {selectedBook && (
-        <EditBookModal
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            setSelectedBook(null);
-          }}
-          book={selectedBook}
-          onSave={handleEditBook}
-        />
-      )}
     </Container>
   );
 }

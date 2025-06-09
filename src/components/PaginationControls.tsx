@@ -1,4 +1,5 @@
-import { Box, Button, Text, useColorModeValue } from '@chakra-ui/react';
+import { HStack, Button, Text, useColorModeValue } from '@chakra-ui/react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 interface PaginationControlsProps {
   page: number;
@@ -7,51 +8,37 @@ interface PaginationControlsProps {
 }
 
 export default function PaginationControls({ page, totalPages, onPageChange }: PaginationControlsProps) {
-  const buttonBg = useColorModeValue('blue.500', 'blue.200');
-  const buttonColor = useColorModeValue('white', 'gray.800');
-  const buttonHoverBg = useColorModeValue('blue.600', 'blue.300');
+  const buttonBg = useColorModeValue('gray.100', 'gray.700');
+  const buttonHoverBg = useColorModeValue('gray.200', 'gray.600');
+  const textColor = useColorModeValue('gray.600', 'gray.400');
 
   return (
-    <Box display="flex" justifyContent="center" mt={4}>
+    <HStack spacing={4}>
       <Button
-        isDisabled={page === 1}
-        onClick={() => onPageChange(page - 1)}
         size="sm"
+        leftIcon={<ChevronLeftIcon />}
+        onClick={() => onPageChange(page - 1)}
+        isDisabled={page === 1}
         bg={buttonBg}
-        color={buttonColor}
-        _hover={{
-          bg: buttonHoverBg
-        }}
-        px={6}
-        py={2}
-        minW="80px"
-        fontSize="0.875rem"
+        _hover={{ bg: buttonHoverBg }}
       >
         Previous
       </Button>
-      <Text
-        mx={4}
-        pt={1}
-        fontSize="1rem"
-      >
+
+      <Text color={textColor}>
         Page {page} of {totalPages}
       </Text>
+
       <Button
-        isDisabled={page === totalPages}
-        onClick={() => onPageChange(page + 1)}
         size="sm"
+        rightIcon={<ChevronRightIcon />}
+        onClick={() => onPageChange(page + 1)}
+        isDisabled={page === totalPages}
         bg={buttonBg}
-        color={buttonColor}
-        _hover={{
-          bg: buttonHoverBg
-        }}
-        px={6}
-        py={2}
-        minW="80px"
-        fontSize="0.875rem"
+        _hover={{ bg: buttonHoverBg }}
       >
         Next
       </Button>
-    </Box>
+    </HStack>
   );
 }

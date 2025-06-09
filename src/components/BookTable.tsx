@@ -26,7 +26,7 @@ export default function BookTable({ books, onBookClick, onSort, sortConfig, hasF
   const columns: { key: keyof Book; label: string; width: string }[] = [
     { key: 'title', label: 'Title', width: '300px' },
     { key: 'author', label: 'Author', width: '200px' },
-    { key: 'pages', label: 'Length (Pages)', width: '120px' },
+    { key: 'pages', label: 'Pages', width: '120px' },
     { key: 'rating', label: 'Rating', width: '100px' },
     { key: 'completed', label: 'Completed', width: '100px' },
     { key: 'date_added', label: 'Date Added', width: '120px' },
