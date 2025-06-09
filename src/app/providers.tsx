@@ -6,12 +6,19 @@ import { useState, useEffect } from 'react'
 
 const theme = extendTheme({
   fonts: {
-    body: 'Arial, sans-serif',
-    heading: 'Arial, sans-serif',
+    body: 'Space Grotesk, sans-serif',
+    heading: 'Space Grotesk, sans-serif',
   },
   config: {
     initialColorMode: 'system',
     useSystemColorMode: true,
+  },
+  styles: {
+    global: (props: any) => ({
+      body: {
+        bg: props.colorMode === 'dark' ? 'rgb(26 32 44)' : '#fefffa',
+      },
+    }),
   },
 })
 

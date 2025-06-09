@@ -3,7 +3,10 @@ import { Providers } from './providers'
 import MenuBar from "@/components/menubar";
 import './globals.css'
 import { headers } from 'next/headers';
-import { Box, Container } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
+import { Space_Grotesk } from 'next/font/google';
+
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: "Minerva, organize your books.",
@@ -21,13 +24,11 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body className={spaceGrotesk.className} suppressHydrationWarning>
         <Providers>
           {!isLoginPage && <MenuBar />}
-          <Box minH="100vh">
-            <Container maxW="7xl" py={6} px={{ base: 4, sm: 6, lg: 8 }}>
-              {children}
-            </Container>
+          <Box minH="100vh" maxW="7xl" mx="auto" py={6} px={{ base: 4, sm: 6, lg: 8 }}>
+            {children}
           </Box>
         </Providers>
       </body>

@@ -13,16 +13,20 @@ import {
   Container,
   Text,
   useColorModeValue,
+  InputLeftElement,
+  Tooltip,
 } from '@chakra-ui/react';
 import { SearchIcon, CloseIcon } from '@chakra-ui/icons';
 import debounce from 'lodash/debounce';
 
 interface SearchWrapperProps {
   onSearch: (query: string) => void;
+  onClearFilters?: () => void;
+  hasFilters?: boolean;
   isLoading?: boolean;
 }
 
-function SearchContent({ onSearch, isLoading }: SearchWrapperProps) {
+function SearchContent({ onSearch, onClearFilters, hasFilters, isLoading }: SearchWrapperProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -68,52 +72,67 @@ function SearchContent({ onSearch, isLoading }: SearchWrapperProps) {
     }
   };
 
+  const bgColor = useColorModeValue('transparent', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+
   return (
-    <Box sx={{
-      width: '100%',
-      maxWidth: '500px',
-      mx: 'auto',
-      px: { xs: 2, sm: 0 }
-    }}>
-      <InputGroup size="lg">
-        <Input
-          placeholder="Search books..."
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            handleSearch(e.target.value);
-          }}
-          onKeyPress={handleKeyDown}
-          pr="4.5rem"
-        />
-        <InputRightElement width="4.5rem">
-          {searchQuery && (
-            <IconButton
-              aria-label="Clear search"
-              icon={<CloseIcon />}
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setSearchQuery('');
-                handleSearch('');
-              }}
-              mr={2}
-            />
-          )}
-          <Button
-            h="1.75rem"
-            size="sm"
-            onClick={() => {
-              handleSearch(searchQuery);
+    <Box display="flex" flexDirection="column" alignItems="center" gap={4} mb={4}>
+      {hasFilters && onClearFilters && (
+        <Tooltip label="Clear all filters">
+          <IconButton
+            aria-label="Clear filters"
+            icon={<CloseIcon />}
+            onClick={onClearFilters}
+            variant="ghost"
+            colorScheme="red"
+            size="lg"
+          />
+        </Tooltip>
+      )}
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={4}
+        p={4}
+        bg={bgColor}
+        borderRadius="md"
+        boxShadow="sm"
+        border="1px solid"
+        borderColor={borderColor}
+        maxW="600px"
+        width="100%"
+      >
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <SearchIcon color="gray.400" />
+          </InputLeftElement>
+          <Input
+            placeholder="Search books..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              handleSearch(e.target.value);
             }}
-            isLoading={isSearching || isLoading}
-            loadingText="Searching..."
-            spinner={<Spinner size="sm" />}
-          >
-            <SearchIcon />
-          </Button>
-        </InputRightElement>
-      </InputGroup>
+            onKeyPress={handleKeyDown}
+            variant="filled"
+            bg="transparent"
+            _hover={{ bg: 'transparent' }}
+            _focus={{ bg: 'transparent' }}
+          />
+        </InputGroup>
+        <Button
+          h="1.75rem"
+          size="sm"
+          onClick={() => {
+            handleSearch(searchQuery);
+          }}
+          isLoading={isSearching || isLoading}
+          loadingText="Searching..."
+          spinner={<Spinner size="sm" />}
+        >
+          <SearchIcon />
+        </Button>
+      </Box>
     </Box>
   );
 }

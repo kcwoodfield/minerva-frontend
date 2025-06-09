@@ -30,7 +30,7 @@ export default function BookTable({ books, onBookClick, onSort, sortConfig }: Bo
   ];
 
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
-  const bgColor = useColorModeValue('white', 'gray.800');
+  const bgColor = useColorModeValue('transparent', 'gray.800');
   const headerHoverBg = useColorModeValue('gray.100', 'gray.600');
 
   return (
@@ -40,6 +40,7 @@ export default function BookTable({ books, onBookClick, onSort, sortConfig }: Bo
       boxShadow="sm"
       overflow="hidden"
       pb={4}
+      mt={6}
     >
       <Table>
         <Thead>
@@ -48,7 +49,7 @@ export default function BookTable({ books, onBookClick, onSort, sortConfig }: Bo
               <Th
                 key={col.key}
                 fontWeight="600"
-                fontSize="1rem"
+                fontSize="0.875rem"
                 py={3}
                 px={4}
                 letterSpacing="0.025em"

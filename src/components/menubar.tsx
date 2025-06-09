@@ -13,11 +13,17 @@ import {
 } from '@chakra-ui/react';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from 'next-themes';
+import Subtitle from './Subtitle';
 
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
     const { resolvedTheme } = useTheme();
-    const bgColor = useColorModeValue('white', 'gray.800');
+    const bgColor = useColorModeValue('transparent', 'gray.800');
+    const [subtitleKey, setSubtitleKey] = React.useState(0);
+
+    const handleLogoClick = () => {
+        setSubtitleKey(prev => prev + 1);
+    };
 
     return (
         <Box
@@ -41,20 +47,23 @@ const MenuBar: React.FC = () => {
                     direction="column"
                     align="center"
                     gap={2}
+                    cursor="pointer"
+                    onClick={handleLogoClick}
                 >
                     <Image
                         src={resolvedTheme === 'dark' ? logoDark : logoLight}
                         alt="Minerva Logo"
-                        width={80}
-                        height={80}
+                        width={90}
+                        height={90}
                     />
                     <Text
-                        fontSize="2rem"
+                        fontSize="1.75rem"
                         fontWeight="bold"
                         mb={0}
                     >
                         Minerva
                     </Text>
+                    <Subtitle key={subtitleKey} />
                 </Flex>
                 <Box>
                     <ThemeToggle />

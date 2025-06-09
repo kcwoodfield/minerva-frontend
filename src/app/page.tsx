@@ -15,7 +15,6 @@ import AddBookModal from '@/components/AddBookModal';
 import BookDetails from '@/components/BookDetails';
 import EditBookModal from '@/components/EditBookModal';
 import SearchWrapper from '@/components/SearchWrapper';
-import TableControls from '@/components/TableControls';
 import { Book } from '@/types/book';
 
 export default function Home() {
@@ -220,12 +219,13 @@ export default function Home() {
         />
       </Box>
 
-      <SearchWrapper onSearch={handleSearch} isLoading={isLoading} />
-
-      <TableControls
-        totalBooks={filteredBooks.length}
-        onClearFilters={() => setSearchQuery('')}
-        hasFilters={searchQuery !== ''}
+      <SearchWrapper
+        onSearch={setSearchQuery}
+        onClearFilters={() => {
+          setSearchQuery('');
+          setSortConfig(null);
+        }}
+        hasFilters={!!searchQuery || !!sortConfig}
       />
 
       <BookTable

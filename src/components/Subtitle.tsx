@@ -24,20 +24,11 @@ export default function Subtitle() {
     setSubtitle(getRandomSubtitle());
   }, []);
 
-  const handleClick = () => {
-    let newSubtitle;
-    do {
-      newSubtitle = getRandomSubtitle();
-    } while (newSubtitle === subtitle && subtitles.length > 1);
-    setSubtitle(newSubtitle);
-  };
-
   return (
     <Text
       fontSize="1rem"
       letterSpacing="0.025em"
       mt={-0.5}
-      cursor="pointer"
       color={mutedColor}
       transition="all 0.2s ease"
       _hover={{
@@ -45,7 +36,6 @@ export default function Subtitle() {
         transform: 'scale(1.02)',
         color: hoverColor
       }}
-      onClick={handleClick}
     >
       {subtitle}
     </Text>
