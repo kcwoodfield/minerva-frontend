@@ -4,12 +4,7 @@ import MenuBar from "@/components/menubar";
 import './globals.css'
 import { headers } from 'next/headers';
 import { Box } from '@chakra-ui/react';
-import { EB_Garamond } from 'next/font/google'
-
-const ebGaramond = EB_Garamond({
-  subsets: ['latin'],
-  display: 'swap',
-})
+import { fonts } from './fonts'
 
 export const metadata: Metadata = {
   title: "Minerva, organize your books.",
@@ -26,7 +21,7 @@ export default function RootLayout({
   const isLoginPage = pathname === '/login';
 
   return (
-    <html lang="en" suppressHydrationWarning className={ebGaramond.className}>
+    <html lang="en" suppressHydrationWarning className={fonts.lora.className}>
       <body suppressHydrationWarning>
         <Providers>
           {!isLoginPage && <MenuBar />}

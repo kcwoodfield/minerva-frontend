@@ -16,7 +16,6 @@ import Subtitle from './Subtitle';
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
     const { colorMode } = useColorMode();
-    const bgColor = useColorModeValue('transparent', 'gray.800');
     const [subtitleKey, setSubtitleKey] = React.useState(0);
 
     const handleLogoClick = () => {
@@ -27,7 +26,6 @@ const MenuBar: React.FC = () => {
         <Box
             as="header"
             position="static"
-            bg={bgColor}
             width="100%"
         >
             <Flex
