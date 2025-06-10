@@ -33,6 +33,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof Book; direction: 'asc' | 'desc' } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 25;
   const toast = useToast();
   const textColor = useColorModeValue('gray.600', 'gray.400');
@@ -40,45 +42,40 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Read initial parameters from URL
-    const sortKey = searchParams.get('sort');
-    const sortDirection = searchParams.get('direction') as 'asc' | 'desc';
-    const page = searchParams.get('page');
-    const bookId = searchParams.get('book');
-
-    if (sortKey && sortDirection && ['asc', 'desc'].includes(sortDirection)) {
-      setSortConfig({ key: sortKey as keyof Book, direction: sortDirection });
-    }
-    if (page) {
-      setCurrentPage(parseInt(page, 10));
-    }
-    if (bookId) {
-      // Find the book in the current books array
-      const book = books.find(b => b.id === bookId);
-      if (book) {
-        setSelectedBook(book);
-      }
-    }
-  }, [searchParams, books]);
-
-  useEffect(() => {
     fetchBooks();
-  }, []);
+  }, [currentPage, sortConfig, searchQuery]);
 
   const fetchBooks = async () => {
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`;
-      console.log('Fetching books from:', apiUrl);
+      const apiUrl = new URL(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`);
 
-      const response = await fetch(apiUrl);
+      // Add pagination parameters
+      apiUrl.searchParams.append('page', currentPage.toString());
+      apiUrl.searchParams.append('limit', itemsPerPage.toString());
+
+      // Add sorting parameters if they exist
+      if (sortConfig) {
+        apiUrl.searchParams.append('sort', sortConfig.key);
+        apiUrl.searchParams.append('order', sortConfig.direction);
+      }
+
+      // Add search parameter if it exists
+      if (searchQuery) {
+        apiUrl.searchParams.append('q', searchQuery);
+      }
+
+      console.log('Fetching books from:', apiUrl.toString());
+
+      const response = await fetch(apiUrl.toString());
       if (!response.ok) {
         throw new Error('Failed to fetch books');
       }
       const data = await response.json();
       console.log('API Response:', data);
 
-      // Handle paginated response
-      setBooks(Array.isArray(data.items) ? data.items : []);
+      setBooks(data.items);
+      setTotalPages(data.pages);
+      setTotalItems(data.total);
     } catch (err) {
       console.error('Error fetching books:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -247,15 +244,8 @@ export default function Home() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when search changes
   };
-
-  const filteredBooks = books.filter(book => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      book.title.toLowerCase().includes(searchLower) ||
-      book.author.toLowerCase().includes(searchLower)
-    );
-  });
 
   const handleSort = (key: keyof Book) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -266,11 +256,13 @@ export default function Home() {
     // Update sort config
     const newSortConfig = { key, direction };
     setSortConfig(newSortConfig);
+    setCurrentPage(1); // Reset to first page when sorting changes
 
     // Update URL with new sort parameters
     const params = new URLSearchParams(searchParams.toString());
     params.set('sort', key);
     params.set('direction', direction);
+    params.set('page', '1');
     router.push(`?${params.toString()}`);
   };
 
@@ -316,26 +308,7 @@ export default function Home() {
     router.push(`?${params.toString()}`);
   };
 
-  const sortedAndFilteredBooks = [...filteredBooks].sort((a, b) => {
-    if (!sortConfig) return 0;
-
-    const { key, direction } = sortConfig;
-    const aValue = a[key];
-    const bValue = b[key];
-
-    if (aValue === bValue) return 0;
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
-
-    const comparison = aValue < bValue ? -1 : 1;
-    return direction === 'asc' ? comparison : -comparison;
-  });
-
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedAndFilteredBooks.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentBooks = sortedAndFilteredBooks.slice(startIndex, endIndex);
+  const currentBooks = books;
 
   if (error) {
     return (
@@ -387,7 +360,7 @@ export default function Home() {
 
         <Flex justify="space-between" align="center" mt={4}>
           <Text color={textColor}>
-            Showing {startIndex + 1}-{Math.min(endIndex, sortedAndFilteredBooks.length)} of {sortedAndFilteredBooks.length} books
+            Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} books
           </Text>
           <PaginationControls
             page={currentPage}
