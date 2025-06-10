@@ -75,25 +75,25 @@ export default function LoginPage() {
             <FormControl isRequired>
               <FormLabel>Username</FormLabel>
               <Input
-                id="username"
-                name="username"
-                autoComplete="username"
-                autoFocus
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
+              id="username"
+              name="username"
+              autoComplete="username"
+              autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
             </FormControl>
 
             <FormControl isRequired>
               <FormLabel>Password</FormLabel>
               <Input
-                type="password"
-                id="password"
+              type="password"
+              id="password"
                 name="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
             </FormControl>
 
             {error && (
@@ -117,7 +117,7 @@ export default function LoginPage() {
               Sign In
             </Button>
           </VStack>
-        </Box>
+          </Box>
       </Box>
     </Container>
   );

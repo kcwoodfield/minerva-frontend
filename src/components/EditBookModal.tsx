@@ -26,7 +26,7 @@ interface EditBookModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (book: Book) => void;
-    book: Book;
+  book: Book;
 }
 
 const EditBookModal: React.FC<EditBookModalProps> = ({ isOpen, onClose, onSave, book }) => {
@@ -67,10 +67,10 @@ const EditBookModal: React.FC<EditBookModalProps> = ({ isOpen, onClose, onSave, 
             rating,
         };
         onSave(updatedBook);
-        onClose();
-    };
+      onClose();
+  };
 
-    return (
+  return (
         <Modal isOpen={isOpen} onClose={onClose} size={{ base: "md", md: "xl", lg: "2xl" }}>
             <ModalOverlay />
             <ModalContent bg={modalBg}>
@@ -272,16 +272,16 @@ const EditBookModal: React.FC<EditBookModalProps> = ({ isOpen, onClose, onSave, 
                         onClick={onClose}
                         fontFamily="EB Garamond"
                     >
-                        Cancel
-                    </Button>
-                    <Button
+            Cancel
+          </Button>
+          <Button
                         colorScheme="blue"
                         onClick={handleSubmit}
                         _hover={{ bg: buttonHoverBg }}
                         fontFamily="EB Garamond"
                     >
                         Save Changes
-                    </Button>
+          </Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

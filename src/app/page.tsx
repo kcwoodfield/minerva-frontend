@@ -95,31 +95,59 @@ export default function Home() {
     }
   };
 
-  const handleAddBook = async (book: { title: string; author: string; pages: number; rating: number; completed: number; }) => {
+  const handleAddBook = async (book: Book) => {
     try {
+      // Include all fields in the create request
+      const createData = {
+        title: book.title,
+        author: book.author,
+        pages: book.pages,
+        rating: book.rating,
+        review: book.review,
+        isbn_13: book.isbn_13,
+        isbn_10: book.isbn_10,
+        completed: book.completed,
+        publisher: book.publisher,
+        publication_date: book.publication_date,
+        genre: book.genre,
+        sub_genre: book.sub_genre,
+        language: book.language,
+        format: book.format,
+        edition: book.edition,
+        summary: book.summary,
+        tags: book.tags,
+        cover_image_url: book.cover_image_url
+      };
+
+      console.log('Sending create data:', createData);
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(book),
+        body: JSON.stringify(createData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add book');
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.detail || 'Failed to create book');
       }
 
       const newBook = await response.json();
-      setBooks(prev => [...prev, newBook]);
+      setBooks(prevBooks => [...prevBooks, newBook]);
       toast({
-        title: 'Book added',
+        title: 'Book created',
+        description: `${newBook.title} has been added to your library`,
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
     } catch (err) {
+      console.error('Error creating book:', err);
       toast({
-        title: 'Error adding book',
+        title: 'Error creating book',
         description: err instanceof Error ? err.message : 'An error occurred',
         status: 'error',
         duration: 5000,

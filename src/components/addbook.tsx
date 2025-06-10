@@ -34,6 +34,7 @@ import {
     Image,
     useDisclosure,
     useColorMode,
+    useToast,
 } from '@chakra-ui/react';
 
 const AddBook: React.FC = () => {
@@ -52,14 +53,88 @@ const AddBook: React.FC = () => {
     const [review, setReview] = React.useState('');
     const [pages, setPages] = React.useState(0);
     const [completion, setCompletion] = React.useState(0);
+    const toast = useToast();
 
     const buttonBg = useColorModeValue('blue.500', 'blue.200');
     const buttonColor = useColorModeValue('white', 'gray.800');
     const buttonHoverBg = useColorModeValue('blue.600', 'blue.300');
     const modalBg = useColorModeValue('white', 'gray.800');
 
-    const handleSubmit = () => {
-        // Handle form submission
+    const handleSubmit = async () => {
+        try {
+            const bookData = {
+                title,
+                author,
+                isbn_13: isbn13,
+                isbn_10: isbn10 || null,
+                publisher: publisher || null,
+                publication_date: publicationDate || null,
+                genre: genre || null,
+                sub_genre: subGenre || null,
+                summary: summary || null,
+                tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+                review: review || null,
+                pages,
+                completed: completion,
+                rating: 0,
+                language: null,
+                format: null,
+                edition: null,
+                cover_image_url: null
+            };
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Failed to create book');
+            }
+
+            // Reset form
+            setTitle('');
+            setAuthor('');
+            setIsbn13('');
+            setIsbn10('');
+            setPublisher('');
+            setPublicationDate('');
+            setGenre('');
+            setSubGenre('');
+            setSummary('');
+            setTags('');
+            setReview('');
+            setPages(0);
+            setCompletion(0);
+
+            // Close modal
+            onClose();
+
+            // Show success message
+            toast({
+                title: 'Book created',
+                description: `${bookData.title} has been added to your library`,
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+            });
+
+            // Refresh the page to show the new book
+            window.location.reload();
+        } catch (error) {
+            console.error('Error creating book:', error);
+            toast({
+                title: 'Error creating book',
+                description: error instanceof Error ? error.message : 'An error occurred',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        }
     };
 
     return (
