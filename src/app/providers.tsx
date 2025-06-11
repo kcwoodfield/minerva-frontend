@@ -6,6 +6,20 @@ import { useState, useEffect } from 'react'
 import { fonts } from './fonts'
 
 const theme = extendTheme({
+  colors: {
+    primary: {
+      50: '#f9e9e4',
+      100: '#f3d3c9',
+      200: '#e7a793',
+      300: '#db7b5d',
+      400: '#cf4f27',
+      500: '#c96442', // Your specified primary color
+      600: '#a14f35',
+      700: '#793b28',
+      800: '#51271b',
+      900: '#28130d',
+    },
+  },
   fonts: {
     body: fonts.lora.style.fontFamily,
     heading: fonts.lora.style.fontFamily,
@@ -25,6 +39,15 @@ const theme = extendTheme({
     Button: {
       baseStyle: {
         fontFamily: fonts.lora.style.fontFamily,
+      },
+      variants: {
+        solid: {
+          bg: 'primary.500',
+          color: 'white',
+          _hover: {
+            bg: 'primary.600',
+          },
+        },
       },
     },
     Input: {
