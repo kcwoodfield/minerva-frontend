@@ -16,9 +16,9 @@ import {
 import { AddIcon, CloseIcon } from '@chakra-ui/icons';
 import { useSearchParams, useRouter } from 'next/navigation';
 import BookTable from '@/components/BookTable';
-import AddBookModal from '@/components/AddBookModal';
-import BookDetails from '@/components/BookDetails';
-import EditBookModal from '@/components/EditBookModal';
+import AddBookDrawer from '@/components/AddBookDrawer';
+import BookDetailsDrawer from '@/components/BookDetailsDrawer';
+import EditBookDrawer from '@/components/EditBookDrawer';
 import SearchWrapper from '@/components/SearchWrapper';
 import PaginationControls from '@/components/PaginationControls';
 import { Book } from '@/types/book';
@@ -92,38 +92,14 @@ export default function Home() {
     }
   };
 
-  const handleAddBook = async (book: Book) => {
+  const handleAddBook = async (book: Omit<Book, 'id' | 'date_added'>) => {
     try {
-      // Include all fields in the create request
-      const createData = {
-        title: book.title,
-        author: book.author,
-        pages: book.pages,
-        rating: book.rating,
-        review: book.review,
-        isbn_13: book.isbn_13,
-        isbn_10: book.isbn_10,
-        completed: book.completed,
-        publisher: book.publisher,
-        publication_date: book.publication_date,
-        genre: book.genre,
-        sub_genre: book.sub_genre,
-        language: book.language,
-        format: book.format,
-        edition: book.edition,
-        summary: book.summary,
-        tags: book.tags,
-        cover_image_url: book.cover_image_url
-      };
-
-      console.log('Sending create data:', createData);
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(createData),
+        body: JSON.stringify(book),
       });
 
       if (!response.ok) {
@@ -341,10 +317,10 @@ export default function Home() {
         </Box>
         <HStack justify="space-between" align="center" mb={4}>
           <HStack spacing={4}>
-            <AddBookModal
+            <AddBookDrawer
               isOpen={isAddModalOpen}
               onClose={() => setIsAddModalOpen(false)}
-              onAdd={handleAddBook}
+              onSave={handleAddBook}
             />
           </HStack>
         </HStack>
@@ -370,10 +346,10 @@ export default function Home() {
         </Flex>
 
         {selectedBook && (
-          <BookDetails
+          <BookDetailsDrawer
+            book={selectedBook}
             isOpen={!!selectedBook}
             onClose={handleCloseBookDetails}
-            book={selectedBook}
             onEdit={(book) => {
               setIsEditModalOpen(true);
             }}
@@ -382,7 +358,7 @@ export default function Home() {
         )}
 
         {selectedBook && (
-          <EditBookModal
+          <EditBookDrawer
             isOpen={isEditModalOpen}
             onClose={() => setIsEditModalOpen(false)}
             book={selectedBook}

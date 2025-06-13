@@ -2,13 +2,13 @@
 
 import { useState, useRef } from 'react';
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerBody,
+  DrawerCloseButton,
   Button,
   Text,
   Box,
@@ -31,7 +31,7 @@ import { DeleteIcon, EditIcon, StarIcon } from '@chakra-ui/icons';
 import { Book } from '@/types/book';
 import Image from 'next/image';
 
-interface BookDetailsProps {
+interface BookDetailsDrawerProps {
   book: Book;
   isOpen: boolean;
   onClose: () => void;
@@ -39,7 +39,7 @@ interface BookDetailsProps {
   onDelete: (bookId: string) => void;
 }
 
-export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }: BookDetailsProps) {
+export default function BookDetailsDrawer({ book, isOpen, onClose, onEdit, onDelete }: BookDetailsDrawerProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -66,10 +66,15 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
-        <ModalOverlay />
-        <ModalContent maxW="800px" bg={bgColor}>
-          <ModalHeader>
+      <Drawer
+        isOpen={isOpen}
+        placement="right"
+        onClose={onClose}
+        size="xl"
+      >
+        <DrawerOverlay />
+        <DrawerContent bg={bgColor}>
+          <DrawerHeader borderBottomWidth="1px">
             <Text fontSize="2xl" fontFamily="Lora">{book.title}</Text>
             {book.subtitle && (
               <Text fontSize="lg" fontFamily="Lora" color="gray.600">{book.subtitle}</Text>
@@ -85,9 +90,9 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
                 <Text fontFamily="Lora" ml={2}>({book.rating}/5)</Text>
               </HStack>
             )}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
+          </DrawerHeader>
+          <DrawerCloseButton />
+          <DrawerBody>
             <Grid templateColumns="repeat(2, 1fr)" gap={4}>
               <GridItem>
                 <Text fontWeight="bold" fontFamily="Lora">Author</Text>
@@ -171,51 +176,9 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
                   <Text fontFamily="Lora" whiteSpace="pre-wrap">{book.summary}</Text>
                 </GridItem>
               )}
-              {book.tags && book.tags.length > 0 && (
-                <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="Lora">Tags</Text>
-                  <Text fontFamily="Lora">{book.tags.join(', ')}</Text>
-                </GridItem>
-              )}
-              {book.related_books && book.related_books.length > 0 && (
-                <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="Lora">Related Books</Text>
-                  <VStack align="start" spacing={2}>
-                    {book.related_books.map((relatedBook, index) => (
-                      <Text key={index} fontFamily="Lora">
-                        • {relatedBook.title} by {relatedBook.author}
-                      </Text>
-                    ))}
-                  </VStack>
-                </GridItem>
-              )}
-              {book.cover_image_url && (
-                <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="Lora" mb={2}>Cover Image</Text>
-                  <ChakraImage
-                    src={book.cover_image_url}
-                    alt={`Cover of ${book.title}`}
-                    maxH="300px"
-                    objectFit="contain"
-                  />
-                </GridItem>
-              )}
-              {book.isbn_13 && (
-                <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="Lora" fontSize="sm">ISBN-13</Text>
-                  <Text fontFamily="Lora" fontSize="sm">{book.isbn_13}</Text>
-                </GridItem>
-              )}
-              {book.isbn_10 && (
-                <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="Lora" fontSize="sm">ISBN-10</Text>
-                  <Text fontFamily="Lora" fontSize="sm">{book.isbn_10}</Text>
-                </GridItem>
-              )}
             </Grid>
-          </ModalBody>
-
-          <ModalFooter>
+          </DrawerBody>
+          <DrawerFooter borderTopWidth="1px">
             <IconButton
               aria-label="Edit book"
               icon={<EditIcon />}
@@ -233,9 +196,9 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
               mr={3}
             />
             <Button onClick={onClose}>Close</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       <AlertDialog
         isOpen={isDeleteAlertOpen}
