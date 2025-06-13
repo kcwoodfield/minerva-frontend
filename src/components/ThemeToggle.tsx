@@ -4,38 +4,15 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { IconButton, Tooltip, Container, Text, useColorMode } from '@chakra-ui/react';
 import { SunIcon, MoonIcon } from '@chakra-ui/icons';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 function ThemeToggleContent() {
   const { colorMode, toggleColorMode } = useColorMode();
   const [mounted, setMounted] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Sync theme with URL on mount
-  useEffect(() => {
-    const themeParam = searchParams.get('theme');
-    if (themeParam && (themeParam === 'dark' || themeParam === 'light') && mounted) {
-      if ((themeParam === 'dark' && colorMode === 'light') ||
-          (themeParam === 'light' && colorMode === 'dark')) {
-        toggleColorMode();
-      }
-    }
-  }, [mounted, searchParams, colorMode, toggleColorMode]);
-
-  const handleThemeChange = () => {
-    toggleColorMode();
-
-    // Update URL with new theme
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('theme', colorMode === 'light' ? 'dark' : 'light');
-    router.push(`/?${params.toString()}`);
-  };
 
   if (!mounted) {
     return null;
@@ -46,7 +23,7 @@ function ThemeToggleContent() {
       <IconButton
         aria-label="Toggle theme"
         icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-        onClick={handleThemeChange}
+        onClick={toggleColorMode}
         variant="ghost"
         size="lg"
       />
