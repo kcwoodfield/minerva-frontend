@@ -19,6 +19,16 @@ import {
     Image,
     Text,
     useColorMode,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    Slider,
+    SliderTrack,
+    SliderFilledTrack,
+    SliderThumb,
+    Textarea,
 } from '@chakra-ui/react';
 import { Book } from '../types/book';
 
@@ -48,7 +58,7 @@ const EditBookModal: React.FC<EditBookModalProps> = ({ isOpen, onClose, onSave, 
     const modalBg = 'white';
     const buttonHoverBg = useColorModeValue('blue.600', 'blue.300');
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const updatedBook: Book = {
             ...book,
             title,
@@ -66,14 +76,19 @@ const EditBookModal: React.FC<EditBookModalProps> = ({ isOpen, onClose, onSave, 
             completed: completion,
             rating,
         };
-        onSave(updatedBook);
-      onClose();
-  };
+        try {
+            await onSave(updatedBook);
+            onClose();
+        } catch (error) {
+            console.error('Error saving book:', error);
+            // The error handling is done in the parent component
+        }
+    };
 
   return (
-        <Modal isOpen={isOpen} onClose={onClose} size={{ base: "md", md: "xl", lg: "2xl" }}>
+        <Modal isOpen={isOpen} onClose={onClose} size={{ base: "md", md: "xl", lg: "3xl" }}>
             <ModalOverlay />
-            <ModalContent bg={modalBg}>
+            <ModalContent maxW="1200px" bg={modalBg}>
                 <ModalHeader>
                     <HStack spacing={3}>
                         <Image
@@ -82,206 +97,204 @@ const EditBookModal: React.FC<EditBookModalProps> = ({ isOpen, onClose, onSave, 
                             boxSize="32px"
                             objectFit="contain"
                         />
-                        <Text fontFamily="EB Garamond" fontSize="xl">Edit Book</Text>
+                        <Text fontFamily="Lora" fontSize="xl">Edit Book</Text>
                     </HStack>
                 </ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+                    <Grid templateColumns="repeat(3, 1fr)" gap={4}>
                         <GridItem>
-                            <FormControl isRequired>
-                                <FormLabel fontFamily="EB Garamond">Title</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Title</FormLabel>
                                 <Input
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
                         <GridItem>
-                            <FormControl isRequired>
-                                <FormLabel fontFamily="EB Garamond">Author</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Author</FormLabel>
                                 <Input
                                     value={author}
                                     onChange={(e) => setAuthor(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
                         <GridItem>
-                            <FormControl isRequired>
-                                <FormLabel fontFamily="EB Garamond">ISBN-13</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">ISBN-13</FormLabel>
                                 <Input
                                     value={isbn13}
                                     onChange={(e) => setIsbn13(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
                         <GridItem>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">ISBN-10</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">ISBN-10</FormLabel>
                                 <Input
                                     value={isbn10}
                                     onChange={(e) => setIsbn10(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
                         <GridItem>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Publisher</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Publisher</FormLabel>
                                 <Input
                                     value={publisher}
                                     onChange={(e) => setPublisher(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
                         <GridItem>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Publication Date</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Publication Date</FormLabel>
                                 <Input
                                     type="date"
                                     value={publicationDate}
                                     onChange={(e) => setPublicationDate(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
                         <GridItem>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Genre</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Genre</FormLabel>
                                 <Input
                                     value={genre}
                                     onChange={(e) => setGenre(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
                         <GridItem>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Sub-Genre</FormLabel>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Sub-Genre</FormLabel>
                                 <Input
                                     value={subGenre}
                                     onChange={(e) => setSubGenre(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
-                        <GridItem colSpan={2}>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Summary</FormLabel>
-                                <Input
-                                    as="textarea"
-                                    rows={8}
-                                    resize="vertical"
+                        <GridItem>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Pages</FormLabel>
+                                <NumberInput
+                                    value={pages}
+                                    onChange={(_, value) => setPages(value)}
+                                    min={0}
+                                    fontFamily="Lora"
+                                >
+                                    <NumberInputField />
+                                    <NumberInputStepper>
+                                        <NumberIncrementStepper />
+                                        <NumberDecrementStepper />
+                                    </NumberInputStepper>
+                                </NumberInput>
+                            </FormControl>
+                        </GridItem>
+
+                        <GridItem colSpan={1.5}>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Rating (0-5)</FormLabel>
+                                <NumberInput
+                                    value={rating}
+                                    onChange={(_, value) => setRating(value)}
+                                    min={0}
+                                    max={5}
+                                    step={0.5}
+                                    fontFamily="Lora"
+                                >
+                                    <NumberInputField />
+                                    <NumberInputStepper>
+                                        <NumberIncrementStepper />
+                                        <NumberDecrementStepper />
+                                    </NumberInputStepper>
+                                </NumberInput>
+                            </FormControl>
+                        </GridItem>
+
+                        <GridItem colSpan={1.5}>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Completion</FormLabel>
+                                <HStack spacing={4} align="center" justify="space-between" mb={2}>
+                                    <Text fontFamily="Lora">0%</Text>
+                                    <Text fontFamily="Lora">50%</Text>
+                                    <Text fontFamily="Lora">100%</Text>
+                                </HStack>
+                                <Slider
+                                    value={completion}
+                                    onChange={(value) => setCompletion(value)}
+                                    min={0}
+                                    max={100}
+                                    step={1}
+                                    fontFamily="Lora"
+                                >
+                                    <SliderTrack>
+                                        <SliderFilledTrack />
+                                    </SliderTrack>
+                                    <SliderThumb />
+                                </Slider>
+                            </FormControl>
+                        </GridItem>
+
+                        <GridItem colSpan={3}>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Summary</FormLabel>
+                                <Textarea
                                     value={summary}
                                     onChange={(e) => setSummary(e.target.value)}
-                                    fontFamily="EB Garamond"
-                                    minH="100px"
+                                    rows={3}
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
-                        <GridItem colSpan={2}>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Tags (comma separated)</FormLabel>
+                        <GridItem colSpan={3}>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Tags (comma separated)</FormLabel>
                                 <Input
                                     value={tags}
                                     onChange={(e) => setTags(e.target.value)}
-                                    fontFamily="EB Garamond"
+                                    fontFamily="Lora"
                                 />
                             </FormControl>
                         </GridItem>
 
-                        <GridItem colSpan={2}>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Review</FormLabel>
-                                <Input
-                                    as="textarea"
-                                    rows={8}
-                                    resize="vertical"
+                        <GridItem colSpan={3}>
+                            <FormControl mb={4}>
+                                <FormLabel fontFamily="Lora">Review</FormLabel>
+                                <Textarea
                                     value={review}
                                     onChange={(e) => setReview(e.target.value)}
-                                    fontFamily="EB Garamond"
-                                    minH="100px"
+                                    rows={3}
+                                    fontFamily="Lora"
                                 />
-                            </FormControl>
-                        </GridItem>
-
-                        <GridItem>
-                            <FormControl isRequired>
-                                <FormLabel fontFamily="EB Garamond">Pages</FormLabel>
-                                <Input
-                                    type="number"
-                                    value={pages}
-                                    onChange={(e) => setPages(parseInt(e.target.value))}
-                                    fontFamily="EB Garamond"
-                                />
-                            </FormControl>
-                        </GridItem>
-
-                        <GridItem>
-                            <FormControl isRequired>
-                                <FormLabel fontFamily="EB Garamond">Rating (0-5)</FormLabel>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    max="5"
-                                    step="1"
-                                    value={rating}
-                                    onChange={(e) => setRating(parseInt(e.target.value))}
-                                    fontFamily="EB Garamond"
-                                />
-                            </FormControl>
-                        </GridItem>
-
-                        <GridItem>
-                            <FormControl>
-                                <FormLabel fontFamily="EB Garamond">Completion</FormLabel>
-                                <Input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={completion}
-                                    onChange={(e) => setCompletion(parseInt(e.target.value))}
-                                />
-                                <HStack justify="space-between" mt={2}>
-                                    <Text fontFamily="EB Garamond">0%</Text>
-                                    <Text fontFamily="EB Garamond">50%</Text>
-                                    <Text fontFamily="EB Garamond">100%</Text>
-                                </HStack>
                             </FormControl>
                         </GridItem>
                     </Grid>
                 </ModalBody>
-
                 <ModalFooter>
-                    <Button
-                        variant="outline"
-                        mr={3}
-                        onClick={onClose}
-                        fontFamily="EB Garamond"
-                    >
-            Cancel
-          </Button>
-          <Button
-                        colorScheme="blue"
-                        onClick={handleSubmit}
-                        _hover={{ bg: buttonHoverBg }}
-                        fontFamily="EB Garamond"
-                    >
-                        Save Changes
-          </Button>
+                    <Button colorScheme="blue" mr={3} onClick={handleSubmit} fontFamily="Lora">
+                        Save
+                    </Button>
+                    <Button variant="ghost" onClick={onClose} fontFamily="Lora">Cancel</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>

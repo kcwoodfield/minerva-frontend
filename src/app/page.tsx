@@ -384,10 +384,7 @@ export default function Home() {
         {selectedBook && (
           <EditBookModal
             isOpen={isEditModalOpen}
-            onClose={() => {
-              setIsEditModalOpen(false);
-              setSelectedBook(null);
-            }}
+            onClose={() => setIsEditModalOpen(false)}
             book={selectedBook}
             onSave={handleEditBook}
           />

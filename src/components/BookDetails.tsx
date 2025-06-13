@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  VStack,
 } from '@chakra-ui/react';
 import { DeleteIcon, EditIcon, StarIcon } from '@chakra-ui/icons';
 import { Book } from '@/types/book';
@@ -69,7 +70,10 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
         <ModalOverlay />
         <ModalContent maxW="800px" bg={bgColor}>
           <ModalHeader>
-            <Text fontSize="2xl" fontFamily="EB Garamond">{book.title}</Text>
+            <Text fontSize="2xl" fontFamily="Lora">{book.title}</Text>
+            {book.subtitle && (
+              <Text fontSize="lg" fontFamily="Lora" color="gray.600">{book.subtitle}</Text>
+            )}
             {book.rating !== undefined && book.rating !== null && (
               <HStack spacing={1} mt={2}>
                 {[...Array(5)].map((_, index) => (
@@ -78,7 +82,7 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
                     color={index < book.rating! ? "yellow.400" : "gray.200"}
                   />
                 ))}
-                <Text fontFamily="EB Garamond" ml={2}>({book.rating}/5)</Text>
+                <Text fontFamily="Lora" ml={2}>({book.rating}/5)</Text>
               </HStack>
             )}
           </ModalHeader>
@@ -86,18 +90,18 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
           <ModalBody>
             <Grid templateColumns="repeat(2, 1fr)" gap={4}>
               <GridItem>
-                <Text fontWeight="bold" fontFamily="EB Garamond">Author</Text>
-                <Text fontFamily="EB Garamond">{book.author}</Text>
+                <Text fontWeight="bold" fontFamily="Lora">Author</Text>
+                <Text fontFamily="Lora">{book.author}</Text>
               </GridItem>
               {book.pages && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Pages</Text>
-                  <Text fontFamily="EB Garamond">{book.pages}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Pages</Text>
+                  <Text fontFamily="Lora">{book.pages}</Text>
                 </GridItem>
               )}
               <GridItem>
-                <Text fontWeight="bold" fontFamily="EB Garamond">Progress</Text>
-                <Text fontFamily="EB Garamond">
+                <Text fontWeight="bold" fontFamily="Lora">Progress</Text>
+                <Text fontFamily="Lora">
                   {book.completed === 0 ? 'Not Started' :
                    book.completed === 100 ? 'Completed' :
                    `In Progress (${book.completed}%)`}
@@ -105,71 +109,89 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
               </GridItem>
               {book.publisher && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Publisher</Text>
-                  <Text fontFamily="EB Garamond">{book.publisher}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Publisher</Text>
+                  <Text fontFamily="Lora">{book.publisher}</Text>
                 </GridItem>
               )}
               {book.publication_date && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Publication Date</Text>
-                  <Text fontFamily="EB Garamond">{book.publication_date}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Publication Date</Text>
+                  <Text fontFamily="Lora">{book.publication_date}</Text>
                 </GridItem>
               )}
               {book.genre && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Genre</Text>
-                  <Text fontFamily="EB Garamond">{book.genre}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Genre</Text>
+                  <Text fontFamily="Lora">{book.genre}</Text>
                 </GridItem>
               )}
               {book.sub_genre && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Sub-Genre</Text>
-                  <Text fontFamily="EB Garamond">{book.sub_genre}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Sub-Genre</Text>
+                  <Text fontFamily="Lora">{book.sub_genre}</Text>
                 </GridItem>
               )}
               {book.language && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Language</Text>
-                  <Text fontFamily="EB Garamond">{book.language}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Language</Text>
+                  <Text fontFamily="Lora">{book.language}</Text>
                 </GridItem>
               )}
               {book.format && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Format</Text>
-                  <Text fontFamily="EB Garamond">{book.format}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Format</Text>
+                  <Text fontFamily="Lora">{book.format}</Text>
                 </GridItem>
               )}
               {book.edition && (
                 <GridItem>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Edition</Text>
-                  <Text fontFamily="EB Garamond">{book.edition}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Edition</Text>
+                  <Text fontFamily="Lora">{book.edition}</Text>
+                </GridItem>
+              )}
+              {book.series_info && (
+                <GridItem>
+                  <Text fontWeight="bold" fontFamily="Lora">Series</Text>
+                  <Text fontFamily="Lora">{book.series_info}</Text>
                 </GridItem>
               )}
               <GridItem>
-                <Text fontWeight="bold" fontFamily="EB Garamond">Date Added</Text>
-                <Text fontFamily="EB Garamond">{new Date(book.date_added).toLocaleDateString()}</Text>
+                <Text fontWeight="bold" fontFamily="Lora">Date Added</Text>
+                <Text fontFamily="Lora">{new Date(book.date_added).toLocaleDateString()}</Text>
               </GridItem>
               {book.review && (
                 <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Review</Text>
-                  <Text fontFamily="EB Garamond" whiteSpace="pre-wrap">{book.review}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Review</Text>
+                  <Text fontFamily="Lora" whiteSpace="pre-wrap">{book.review}</Text>
                 </GridItem>
               )}
               {book.summary && (
                 <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Summary</Text>
-                  <Text fontFamily="EB Garamond" whiteSpace="pre-wrap">{book.summary}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Summary</Text>
+                  <Text fontFamily="Lora" whiteSpace="pre-wrap">{book.summary}</Text>
                 </GridItem>
               )}
               {book.tags && book.tags.length > 0 && (
                 <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="EB Garamond">Tags</Text>
-                  <Text fontFamily="EB Garamond">{book.tags.join(', ')}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora">Tags</Text>
+                  <Text fontFamily="Lora">{book.tags.join(', ')}</Text>
+                </GridItem>
+              )}
+              {book.related_books && book.related_books.length > 0 && (
+                <GridItem colSpan={2}>
+                  <Text fontWeight="bold" fontFamily="Lora">Related Books</Text>
+                  <VStack align="start" spacing={2}>
+                    {book.related_books.map((relatedBook, index) => (
+                      <Text key={index} fontFamily="Lora">
+                        • {relatedBook.title} by {relatedBook.author}
+                      </Text>
+                    ))}
+                  </VStack>
                 </GridItem>
               )}
               {book.cover_image_url && (
                 <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="EB Garamond" mb={2}>Cover Image</Text>
+                  <Text fontWeight="bold" fontFamily="Lora" mb={2}>Cover Image</Text>
                   <ChakraImage
                     src={book.cover_image_url}
                     alt={`Cover of ${book.title}`}
@@ -180,14 +202,14 @@ export default function BookDetails({ book, isOpen, onClose, onEdit, onDelete }:
               )}
               {book.isbn_13 && (
                 <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="EB Garamond" fontSize="sm">ISBN-13</Text>
-                  <Text fontFamily="EB Garamond" fontSize="sm">{book.isbn_13}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora" fontSize="sm">ISBN-13</Text>
+                  <Text fontFamily="Lora" fontSize="sm">{book.isbn_13}</Text>
                 </GridItem>
               )}
               {book.isbn_10 && (
                 <GridItem colSpan={2}>
-                  <Text fontWeight="bold" fontFamily="EB Garamond" fontSize="sm">ISBN-10</Text>
-                  <Text fontFamily="EB Garamond" fontSize="sm">{book.isbn_10}</Text>
+                  <Text fontWeight="bold" fontFamily="Lora" fontSize="sm">ISBN-10</Text>
+                  <Text fontFamily="Lora" fontSize="sm">{book.isbn_10}</Text>
                 </GridItem>
               )}
             </Grid>
