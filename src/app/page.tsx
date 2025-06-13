@@ -45,6 +45,45 @@ export default function Home() {
     fetchBooks();
   }, [currentPage, sortConfig, searchQuery]);
 
+  // Add new useEffect for checking URL parameters
+  useEffect(() => {
+    const bookId = searchParams.get('book');
+    if (bookId && !isLoading) {  // Only proceed if we're not loading and have a book ID
+      // Find the book in the current list
+      const book = books.find(b => b.id === bookId);
+      if (book) {
+        setSelectedBook(book);
+      } else {
+        // If book not found in current list, fetch it individually
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}/${bookId}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch book');
+            }
+            return response.json();
+          })
+          .then(book => {
+            setSelectedBook(book);
+          })
+          .catch(err => {
+            console.error('Error fetching book:', err);
+            // Remove the book parameter from URL if the book doesn't exist
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete('book');
+            router.push(`?${params.toString()}`);
+
+            toast({
+              title: 'Book not found',
+              description: 'The requested book could not be found',
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+            });
+          });
+      }
+    }
+  }, [searchParams, books, isLoading]); // Add isLoading to dependencies
+
   const fetchBooks = async () => {
     try {
       const apiUrl = new URL(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/library'}`);
