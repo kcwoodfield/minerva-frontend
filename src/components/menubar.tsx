@@ -2,20 +2,15 @@
 
 import React from 'react';
 import Image from 'next/image';
-import AddBook from "@/components/addbook";
 import {
   Box,
   Flex,
   Text,
-  useColorModeValue,
-  useColorMode,
 } from '@chakra-ui/react';
-import ThemeToggle from './ThemeToggle';
 import Subtitle from './Subtitle';
 
 const MenuBar: React.FC = () => {
     const [isOpen, setIsOpen] = React.useState(false);
-    const { colorMode } = useColorMode();
     const [subtitleKey, setSubtitleKey] = React.useState(0);
 
     const handleLogoClick = () => {
@@ -37,7 +32,7 @@ const MenuBar: React.FC = () => {
                 mx="auto"
             >
                 <Box>
-                    <AddBook />
+                    {/* AddBook component removed */}
                 </Box>
                 <Flex
                     direction="column"
@@ -47,7 +42,7 @@ const MenuBar: React.FC = () => {
                     onClick={handleLogoClick}
                 >
                     <Image
-                        src={colorMode === 'dark' ? '/logo/minerva-logo-dark.png' : '/logo/minerva-logo.png'}
+                        src="/logo/minerva-logo.png"
                         alt="Minerva Logo"
                         width={90}
                         height={90}
@@ -62,7 +57,7 @@ const MenuBar: React.FC = () => {
                     <Subtitle key={subtitleKey} />
                 </Flex>
                 <Box>
-                    <ThemeToggle />
+                    {/* ThemeToggle removed */}
                 </Box>
             </Flex>
         </Box>
